@@ -1,9 +1,8 @@
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/downloads/)
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![tests](https://github.com/joshtkraus/google-flights-scraper/workflows/tests/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://github.com/joshtkraus/google-flights-scraper/workflows/pre-commit/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
+[![tests](https://github.com/joshtkraus/google-flights-scraper/workflows/tests/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
+[![coverage](https://codecov.io/gh/joshtkraus/google-flights-scraper/graph/badge.svg)](https://codecov.io/gh/joshtkraus/google-flights-scraper)
 
 # Google Flights Web Scraper
 
