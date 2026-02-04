@@ -1,7 +1,8 @@
 """Example usage script for Google Flights Scraper."""
 
-from datetime import datetime, timedelta
 import json
+from datetime import datetime, timedelta
+
 from google_flights_scraper import GoogleFlightsScraper
 
 # Get today's date
@@ -17,11 +18,11 @@ def example_basic_search():
     scraper = GoogleFlightsScraper()
 
     result = scraper.scrape_flight(
-        departure_code='LAX',
-        arrival_code='JFK',
+        departure_code="LAX",
+        arrival_code="JFK",
         start_date=start,
         end_date=end,
-        seat_class='Economy (include Basic)',
+        seat_class="Economy (include Basic)",
     )
 
     print(json.dumps(result, indent=2))
@@ -36,11 +37,11 @@ def example_international_search():
     scraper = GoogleFlightsScraper()
 
     result = scraper.scrape_flight(
-        departure_code='JFK',
-        arrival_code='LHR',
+        departure_code="JFK",
+        arrival_code="LHR",
         start_date=start,
         end_date=end,
-        seat_class='Premium economy',
+        seat_class="Premium economy",
     )
 
     print(json.dumps(result, indent=2))
@@ -55,11 +56,11 @@ def example_business_class():
     scraper = GoogleFlightsScraper()
 
     result = scraper.scrape_flight(
-        departure_code='SFO',
-        arrival_code='MIA',
+        departure_code="SFO",
+        arrival_code="MIA",
         start_date=start,
         end_date=end,
-        seat_class='Business',
+        seat_class="Business",
     )
 
     print(json.dumps(result, indent=2))
@@ -73,13 +74,15 @@ def example_save_to_file():
 
     scraper = GoogleFlightsScraper()
 
-    json_output = scraper.scrape_to_json(
-        departure_code='MIA',
-        arrival_code='SEA',
+    json_output = scraper.scrape_flight(
+        departure_code="MIA",
+        arrival_code="SEA",
         start_date=start,
         end_date=end,
-        seat_class='Economy (include Basic)',
-        output_file='examples/flight_results.json',
+        seat_class="Economy (include Basic)",
+        export=True,
+        export_type="json",
+        export_path="examples/output/flight_results.json",
     )
 
     print(json_output)
@@ -98,9 +101,9 @@ def example_batch_processing():
     end_3 = (today + timedelta(weeks=13)).strftime("%m/%d/%Y")
 
     routes = [
-        ('LAX', 'JFK', start_1, end_1, 'Economy (include Basic)'),
-        ('SFO', 'BOS', start_2, end_2, 'Business'),
-        ('SEA', 'ATL', start_3, end_3, 'Premium economy'),
+        ("LAX", "JFK", start_1, end_1, "Economy (include Basic)"),
+        ("SFO", "BOS", start_2, end_2, "Business"),
+        ("SEA", "ATL", start_3, end_3, "Premium economy"),
     ]
 
     all_results = []
@@ -112,7 +115,7 @@ def example_batch_processing():
         print(f"Completed: {dep} to {arr}")
 
     # Save all results
-    with open('examples/all_flights.json', 'w') as f:
+    with open("examples/output/all_flights.json", "w") as f:
         json.dump(all_results, f, indent=2)
 
     print(json.dumps(all_results, indent=2))
@@ -130,11 +133,11 @@ def example_custom_configuration():
     scraper.wait_time = 20
 
     result = scraper.scrape_flight(
-        departure_code='LAX',
-        arrival_code='HNL',
+        departure_code="LAX",
+        arrival_code="HNL",
         start_date=start,
         end_date=end,
-        seat_class='Economy (exclude Basic)',
+        seat_class="Economy (exclude Basic)",
     )
 
     print(json.dumps(result, indent=2))

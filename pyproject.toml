@@ -64,6 +64,9 @@ lint.select = [
     "T100", # breakpoint
     "COM", # commas
 ]
+lint.ignore = [
+    "COM812"
+]
 exclude = [".venv", ".git"]
 
 [tool.ruff.lint.pydocstyle]
@@ -89,12 +92,8 @@ pythonpath = "src"
 
 [tool.mypy]
 python_version = "3.12"
-check_untypes_defs = true
-ignore_missed_imports = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unused_ignores = true
 no_implicit_optional = false
-disallow_untyped_called = false
-disallow_untypes_defs = false
 exclude = ["tests"]

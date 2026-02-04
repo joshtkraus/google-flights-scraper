@@ -2,4 +2,4 @@
 
 from .scraper import GoogleFlightsScraper
 
-__all__ = ['GoogleFlightsScraper']
+__all__ = ["GoogleFlightsScraper"]
