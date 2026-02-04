@@ -25,10 +25,12 @@ repos:
   rev: v0.13.3
   hooks:
     - id: ruff
-      name: Sorrt imports with ruff
+      name: Sort imports with ruff
       args: [--fix]
+      exclude: ^(tests|examples)/.*$
     - id: ruff-format
       name: Format with ruff
+      exclude: ^(tests|examples)/.*$
 
 - repo: https://github.com/jsh9/pydoclint
   rev: 0.6.7
@@ -38,10 +40,10 @@ repos:
         --style=google,
         --check-return-types=false
       ]
-      exclude: ^tests/.*$
+      exclude: ^(tests|examples)/.*$
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.15.0
   hooks:
     - id: mypy
-      exclude: ^tests/.*$
+      exclude: ^(tests|examples)/.*$

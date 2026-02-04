@@ -67,7 +67,7 @@ lint.select = [
 lint.ignore = [
     "COM812"
 ]
-exclude = [".venv", ".git"]
+exclude = [".venv", ".git", "tests/", "examples/"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -83,7 +83,7 @@ check-class-attributed = false
 
 [tool.pydocstyle]
 convention = "google"
-match-dir = '^(?!tests).*' # Exclude tests
+match-dir = '^(?!tests|examples).*' # Exclude tests and examples
 
 [tool.pytest.ini_options]
 xfail_strict = true
@@ -96,4 +96,4 @@ warn_redundant_casts = true
 warn_return_any = true
 warn_unused_ignores = true
 no_implicit_optional = false
-exclude = ["tests"]
+exclude = ["tests", "examples"]
