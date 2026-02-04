@@ -2,8 +2,8 @@
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![Tests](https://github.com/joshtkraus/google-flights-scraper/workflows/Tests/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
-[![CI](https://github.com/joshtkraus/google-flights-scraper/workflows/CI/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
+[![tests](https://github.com/joshtkraus/google-flights-scraper/workflows/tests/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
+[![pre-commit](https://github.com/joshtkraus/google-flights-scraper/workflows/pre-commit/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
 
 # Google Flights Web Scraper
 
