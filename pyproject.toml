@@ -1,0 +1,100 @@
+[project]
+name = "google_flights_scraper"
+dynamic = ["version"]
+description = "A Python-based web scraper for Google Flights using Selenium"
+readme = "README.md"
+authors = [
+    {name = "Josh Kraus", email = "joshtkraus@gmail.com"}
+]
+
+requires-python = ">=3.11, <4.0"
+dependencies = [
+    "selenium>=4.15.0",
+    "pandas>=2.0.0",
+    "webdriver-manager>=4.0.0",
+]
+
+
+[dependency-groups]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "ruff>=0.15.0",
+    "pydocstyle>=6.3.0",
+    "pre-commit>=4.5.1",
+]
+
+[tool.uv]
+default-groups = [
+    "dev"
+]
+
+[tool.hatch.build]
+packages = ["src/google_flights_scraper"]
+
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+preview = true
+lint.select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+    "G", # flake8-logging-format
+    "I", # flake8-isort
+    "D", # pydocstyle
+    "T100", # breakpoint
+    "COM", # commas
+]
+exclude = [".venv", ".git"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pydoclint]
+style = "Google"
+exclude = "tests/"
+skip-checking-short-docstrings = false
+check-return-types = false
+check-yield-types = false
+allow-init-docstring = true
+check-class-attributed = false
+
+[tool.pydocstyle]
+convention = "google"
+match-dir = '^(?!tests).*' # Exclude tests
+
+[tool.pytest.ini_options]
+xfail_strict = true
+adopts = ["--color=yes", "--junitxml=junit.xml", "-n=auto"]
+pythonpath = "src"
+
+[tool.mypy]
+python_version = "3.12"
+check_untypes_defs = true
+ignore_missed_imports = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unused_ignores = true
+no_implicit_optional = false
+disallow_untyped_called = false
+disallow_untypes_defs = false
+exclude = ["tests"]

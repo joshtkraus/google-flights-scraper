@@ -1,0 +1,47 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: trailing-whitespace
+      name: Remove trailing whitespace at end of line
+    - id: end-of-file-fixer
+      name: Make sure that there is an empty line at the end
+      exclude: (REAMDME.md)
+    - id: check-merge-conflict
+      name: Check that merge conflicts are not being commited
+    - id: check-added-large-files
+      name: Prevent adding large files
+      args: ['--maxkb=500', '--enforce-all']
+    - id: check-yaml
+      name: Check yaml files for parse errors
+      args: [--unsafe]
+    - id: no-commit-to-branch
+      name: Prevent committing to main branch
+      args: [--branch, main]
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.13.3
+  hooks:
+    - id: ruff
+      name: Sorrt imports with ruff
+      args: [--fix]
+    - id: ruff-format
+      name: Format with ruff
+
+- repo: https://github.com/jsh9/pydoclint
+  rev: 0.6.7
+  hooks:
+    - id: pydoclint
+      args: [
+        --style=google,
+        --check-return-types=false
+      ]
+      exclude: ^tests/.*$
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.15.0
+  hooks:
+    - id: mypy
+      exclude: ^tests/.*$

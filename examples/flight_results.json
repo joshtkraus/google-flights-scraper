@@ -1,0 +1,44 @@
+{
+  "inputs": {
+    "departure_airport": "MIA",
+    "arrival_airport": "SEA",
+    "departure_date": "03/03/2026",
+    "return_date": "03/10/2026",
+    "seat_class": "Economy (include Basic)"
+  },
+  "departure_flight": {
+    "airline": "Alaska",
+    "departure_airport": "Miami International Airport",
+    "departure_date": "Tuesday, March 3",
+    "departure_time": "5:59 PM",
+    "num_stops": 0,
+    "connection_airports": [],
+    "layover_durations": [],
+    "arrival_airport": "Seattle-Tacoma International Airport",
+    "arrival_date": "Tuesday, March 3",
+    "arrival_time": "10:04 PM",
+    "duration_minutes": 425,
+    "duration_str": "7 hr 5 min",
+    "carry_on_bags": 1,
+    "checked_bags": 0
+  },
+  "return_flight": {
+    "airline": "Alaska",
+    "departure_airport": "Seattle-Tacoma International Airport",
+    "departure_date": "Tuesday, March 10",
+    "departure_time": "8:08 AM",
+    "num_stops": 0,
+    "connection_airports": [],
+    "layover_durations": [],
+    "arrival_airport": "Miami International Airport",
+    "arrival_date": "Tuesday, March 10",
+    "arrival_time": "4:59 PM",
+    "duration_minutes": 351,
+    "duration_str": "5 hr 51 min",
+    "carry_on_bags": 1,
+    "checked_bags": 0
+  },
+  "price": 257,
+  "price_classification": "NA",
+  "price_relativity": "NA"
+}
