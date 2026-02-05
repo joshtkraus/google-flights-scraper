@@ -28,11 +28,11 @@ jobs:
       with:
         enable-cache: true
 
+    - name: Removing previous chrome instances on runner
+      run: sudo apt purge google-chrome-stable
+
     - name: Set up Python ${{ matrix.python-version }}
       run: uv python install ${{ matrix.python-version }}
-
-    - name: Install Google Chrome
-      uses: browser-actions/setup-chrome@v2
 
     - name: Install project and test dependencies
       run: uv sync --all-extras --dev

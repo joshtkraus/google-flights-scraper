@@ -209,3 +209,6 @@ __marimo__/
 
 # Local History
 .history/
+
+# Mac
+.DS_Store
