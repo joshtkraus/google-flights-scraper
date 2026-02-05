@@ -33,9 +33,6 @@ jobs:
 
     - name: Install Google Chrome
       uses: browser-actions/setup-chrome@v2
-      with:
-        chrome-version: 120
-        install-chromedriver: true
 
     - name: Install project and test dependencies
       run: uv sync --all-extras --dev
