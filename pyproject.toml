@@ -12,7 +12,6 @@ dependencies = [
     "selenium>=4.15.0",
     "pandas>=2.0.0",
     "webdriver-manager>=4.0.0",
-    "chromedriver-autoinstaller>=0.6.4",
 ]
 
 

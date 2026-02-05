@@ -4,7 +4,6 @@ import json
 import time
 from pathlib import Path
 
-import chromedriver_autoinstaller
 import pandas as pd
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -24,8 +23,6 @@ from .validators import (
     validate_export_params,
     validate_seat_class,
 )
-
-chromedriver_autoinstaller.install()
 
 
 class GoogleFlightsScraper:
