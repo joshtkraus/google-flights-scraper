@@ -1,6 +1,7 @@
 """Main scraper orchestration class."""
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -34,7 +35,8 @@ class GoogleFlightsScraper:
         csv_path = package_dir / "data" / "airport_codes.csv"
         self.airport_codes_df = pd.read_csv(csv_path)
         self.driver = setup_chrome_driver(headless=True)
-        self.wait_time = DEFAULT_WAIT_TIME
+        # Use longer timeouts in CI
+        self.wait_time = 30 if os.getenv("CI") else DEFAULT_WAIT_TIME
         self.wait = WebDriverWait(self.driver, self.wait_time)
 
     def _create_result_structure(

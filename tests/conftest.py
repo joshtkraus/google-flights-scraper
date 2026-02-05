@@ -18,7 +18,7 @@ def domestic_economy_basic():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    result = scraper.scrape_flight(
         departure_code="LAX",
         departure_country="United States of America",
         arrival_code="New York",
@@ -27,6 +27,13 @@ def domestic_economy_basic():
         end_date=end,
         seat_class="Economy (include Basic)",
     )
+    # Debug output
+    print(f"\n=== domestic_economy_basic ===")
+    print(f"Status: {result['status']}")
+    print(f"Departure airline: {result['departure_flight']['airline']}")
+    print(f"Price: {result['price']}")
+
+    return result
 
 @pytest.fixture(scope="session")
 def domestic_economy_non_basic():
