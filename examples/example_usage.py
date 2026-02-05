@@ -89,8 +89,8 @@ def example_save_to_file():
         end_date=end,
         seat_class="Economy (include Basic)",
         export=True,
-        export_type="json",
-        export_path="examples/output/flight_results.json",
+        export_type="csv",
+        export_path="examples/output/flight_results.csv",
     )
 
     print(json_output)

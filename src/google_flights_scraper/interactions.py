@@ -219,7 +219,7 @@ def press_search_button(wait: WebDriverWait):
 
 
 def wait_until_class_stable(
-    driver: Chrome, locator: tuple, stable_duration: float = 1.0, timeout: int = 20
+    driver: Chrome, locator: tuple, stable_duration: float = 1.0, timeout: int = 10
 ):
     """Wait until an element's class attribute stops changing.
 

@@ -111,14 +111,14 @@ def extract_layover_info(flight_description: str):
     """
     # Pattern for "layover at [airport name]" - handles optional minutes
     pattern_at = (
-        r"Layover \(\d+ of \d+\) is a (\d+ hr(?: \d+ min)?) "
-        r"layover at ([^.]+?)(?:\sin\s[^.]+)?\.(?:\s|$)"
+        r"Layover \(\d+ of \d+\) is a ((?:\d+ hr)?(?: \d+ min)?)"
+        r"(?: overnight)? layover at ([^.]+?)(?:\sin\s[^.]+)?\.(?:\s|$)"
     )
 
     # Pattern for "layover in [city]" (for terminal transfers) - handles optional minutes
     pattern_in = (
-        r"Layover \(\d+ of \d+\) is a (\d+ hr(?: \d+ min)?) "
-        r"layover in ([^.]+?)\.(?:\s+Transfer)?"
+        r"Layover \(\d+ of \d+\) is a ((?:\d+ hr)?(?: \d+ min)?)"
+        r"(?: overnight)? layover in ([^.]+?)\.(?:\s+Transfer)?"
     )
 
     # Try pattern with "at" first
@@ -128,7 +128,6 @@ def extract_layover_info(flight_description: str):
     # pattern_at returns tuples of (duration, airport) due to 2 capturing groups
     # pattern_in returns tuples of (duration, location)
     all_matches = matches_at + matches_in
-
     if all_matches:
         layover_durations = [m[0].strip() for m in all_matches]
         connection_airports = [m[1].strip() for m in all_matches]
@@ -157,6 +156,13 @@ def extract_duration(flight_description: str):
     if m := re.search(r"Total duration (\d+) hr", flight_description):
         hours = int(m.group(1))
         duration_minutes = hours * 60
+        duration_str = f"{hours} hr"
+        return duration_minutes, duration_str
+
+    # Pattern with only minutes (no hours)
+    if m := re.search(r"Total duration (\d+) min", flight_description):
+        minutes = int(m.group(1))
+        duration_minutes = minutes
         duration_str = f"{hours} hr"
         return duration_minutes, duration_str
 

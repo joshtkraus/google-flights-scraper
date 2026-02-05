@@ -10,7 +10,7 @@ today = datetime.today()
 
 
 @pytest.fixture(scope="session")
-def domestic_economy_basic():
+def domestic_economy_basic(tmp_path_factory):
     """Domestic flight from LAX to New York with Basic Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
@@ -18,22 +18,15 @@ def domestic_economy_basic():
 
     scraper = GoogleFlightsScraper()
 
-    result = scraper.scrape_flight(
+    return scraper.scrape_flight(
         departure_code="LAX",
         departure_country="United States of America",
         arrival_code="New York",
         arrival_country="United States of America",
         start_date=start,
         end_date=end,
-        seat_class="Economy (include Basic)",
+        seat_class="Economy (include Basic)"
     )
-    # Debug output
-    print(f"\n=== domestic_economy_basic ===")
-    print(f"Status: {result['status']}")
-    print(f"Departure airline: {result['departure_flight']['airline']}")
-    print(f"Price: {result['price']}")
-
-    return result
 
 @pytest.fixture(scope="session")
 def domestic_economy_non_basic():

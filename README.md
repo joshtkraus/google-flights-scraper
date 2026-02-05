@@ -1,7 +1,6 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![pre-commit](https://github.com/joshtkraus/google-flights-scraper/workflows/pre-commit/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
-[![tests](https://github.com/joshtkraus/google-flights-scraper/workflows/tests/badge.svg)](https://github.com/joshtkraus/google-flights-scraper/actions)
 [![coverage](https://codecov.io/gh/joshtkraus/google-flights-scraper/graph/badge.svg)](https://codecov.io/gh/joshtkraus/google-flights-scraper)
 
 # Google Flights Web Scraper
@@ -56,6 +55,21 @@ See `examples/` directory for usage examples.
    ```bash
    uv run pytest -xv
    ```
-   Note: These will also run on PR.
 
-6. Create PR to merge to `dev`
+6. OPTIONAL: Run integration tests and upload coverage
+   Create a .env file in your project root:
+   ```bash
+   CODECOV_TOKEN=your_token_here
+   ```
+
+   Run tests and upload coverage:
+   ```bash
+
+   # Run all tests with coverage
+   uv run python -c "from dotenv import load_dotenv; load_dotenv()" && uv run pytest --cov=src --cov-report=xml
+
+   # Upload to Codecov
+   codecovcli do-upload --report-type test_results --file coverage.junit.xml
+   ```
+
+7. Create PR to merge to `dev`
