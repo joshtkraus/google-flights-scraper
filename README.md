@@ -66,10 +66,13 @@ See `examples/` directory for usage examples.
    ```bash
 
    # Run all tests with coverage
-   uv run python -c "from dotenv import load_dotenv; load_dotenv()" && uv run pytest --cov=src --cov-report=xml
+   uv run pytest --cov=src --cov-report=xml
+
+   # Load CODECOV_TOKEN
+   uv run python -c "from dotenv import load_dotenv; import os; load_dotenv(); CODECOV_TOKEN = os.getenv('CODECOV_TOKEN')"
 
    # Upload to Codecov
-   codecovcli do-upload --report-type test_results --file coverage.junit.xml
+   codecovcli upload-process
    ```
 
 7. Create PR to merge to `dev`
