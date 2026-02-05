@@ -87,7 +87,7 @@ match-dir = '^(?!tests|examples).*' # Exclude tests and examples
 
 [tool.pytest.ini_options]
 xfail_strict = true
-adopts = ["--color=yes", "--junitxml=junit.xml", "-n=auto"]
+addopts = ["--color=yes", "--junitxml=junit.xml"]
 pythonpath = "src"
 
 [tool.mypy]

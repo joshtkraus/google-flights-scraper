@@ -19,6 +19,7 @@ from .parsers import create_empty_flight_info, extract_flight_details, extract_p
 from .validators import (
     is_domestic_us_flight,
     validate_airport_code,
+    validate_dates,
     validate_export_params,
     validate_seat_class,
 )
@@ -39,7 +40,9 @@ class GoogleFlightsScraper:
     def _create_result_structure(
         self,
         departure_code: str,
+        departure_country: str,
         arrival_code: str,
+        arrival_country: str,
         start_date: str,
         end_date: str,
         seat_class: str,
@@ -47,8 +50,10 @@ class GoogleFlightsScraper:
         """Create the initial result structure for storing flight data.
 
         Args:
-            departure_code (str): IATA code for departure airport
-            arrival_code (str): IATA code for arrival airport
+            departure_code (str): IATA code or cirty for departure airport
+            departure_country (str): Country of departure airport or city
+            arrival_code (str): IATA code or city for arrival airport
+            arrival_country (str): Country of arrival airport or city
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
             seat_class (str): Seat class string
@@ -59,25 +64,47 @@ class GoogleFlightsScraper:
         return {
             "inputs": {
                 "departure_airport": departure_code,
+                "departure_country": departure_country,
                 "arrival_airport": arrival_code,
+                "arrival_country": arrival_country,
                 "departure_date": start_date,
                 "return_date": end_date,
                 "seat_class": seat_class,
             },
             "departure_flight": create_empty_flight_info(),
             "return_flight": create_empty_flight_info(),
-            "price": "NA",
-            "price_classification": "NA",
-            "price_relativity": "NA",
+            "price": None,
+            "price_classification": None,
+            "price_relativity": None,
+            "status": None,
         }
 
-    def _validate_inputs(self, departure_code: str, arrival_code: str, seat_class: str):
+    def _validate_inputs(
+        self,
+        departure_code: str,
+        departure_country: str,
+        arrival_code: str,
+        arrival_country: str,
+        seat_class: str,
+        start_date: str,
+        end_date: str,
+        export: bool,
+        export_type: str | None,
+        export_path: str | None,
+    ):
         """Validate all input parameters.
 
         Args:
-            departure_code (str): IATA code for departure airport
-            arrival_code (str): IATA code for arrival airport
+            departure_code (str): IATA code or city for departure airport
+            departure_country (str): Country for departure airport
+            arrival_code (str): IATA code or city for arrival airport
+            arrival_country (str): Country for arrival airport
             seat_class (str): Seat class string
+            start_date (str): Departure date in MM/DD/YYYY format
+            end_date (str): Return date in MM/DD/YYYY format
+            export (bool): Whether to export the result dictionary or not. Defaults to false
+            export_type (str | None): Type of export, required if export is True
+            export_path (str | None): Path to export, required if export is True
 
         Returns:
             bool: True if flight is domestic US
@@ -88,13 +115,19 @@ class GoogleFlightsScraper:
 
         # Determine if domestic US flight
         is_domestic_us = is_domestic_us_flight(
-            departure_code,
-            arrival_code,
+            departure_country,
+            arrival_country,
             self.airport_codes_df,
         )
 
         # Validate seat class
         validate_seat_class(seat_class, is_domestic_us)
+
+        # Validate dates
+        validate_dates(start_date, end_date)
+
+        # Validate export params
+        validate_export_params(export, export_type, export_path)
 
         return is_domestic_us
 
@@ -136,7 +169,7 @@ class GoogleFlightsScraper:
             result (dict): Dictionary to populate with flight details
 
         Returns:
-            dict: Updated result dictionary with flight details
+            tuple: (updated result dictionary, success status message)
         """
         # Find and select best departure flight
         best_departure = find_and_select_best_flight(
@@ -145,7 +178,7 @@ class GoogleFlightsScraper:
             self.wait_time,
         )
         if best_departure is None:
-            return result
+            return result, "No departure flights found."
 
         # Extract flight details
         result["departure_flight"], result["price"] = extract_flight_details(best_departure)
@@ -160,7 +193,7 @@ class GoogleFlightsScraper:
             self.wait_time,
         )
         if best_return is None:
-            return result
+            return result, "No return flights found."
 
         # Extract flight details
         result["return_flight"], result["price"] = extract_flight_details(best_return)
@@ -168,7 +201,7 @@ class GoogleFlightsScraper:
         # Select flight
         best_return.click()
 
-        return result
+        return result, "Ran successfully."
 
     def _export_data(self, result: dict, export_type: str | None, export_path: str | None):
         """Export dict to file in desired format.
@@ -190,7 +223,9 @@ class GoogleFlightsScraper:
     def scrape_flight(
         self,
         departure_code: str,
+        departure_country: str,
         arrival_code: str,
+        arrival_country: str,
         start_date: str,
         end_date: str,
         seat_class: str,
@@ -201,8 +236,10 @@ class GoogleFlightsScraper:
         """Scrape Google Flights for specified route and parameters.
 
         Args:
-            departure_code (str): IATA code for departure airport
-            arrival_code (str): IATA code for arrival airport
+            departure_code (str): IATA code or city for departure airport
+            departure_country (str): Country for departure airport
+            arrival_code (str): IATA code or city for arrival airport
+            arrival_country (str): Country for arrival airport
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
             seat_class (str): Seat class (e.g., "Economy (include Basic)", "Business", etc.)
@@ -216,7 +253,9 @@ class GoogleFlightsScraper:
         # Initialize result structure
         result = self._create_result_structure(
             departure_code,
+            departure_country,
             arrival_code,
+            arrival_country,
             start_date,
             end_date,
             seat_class,
@@ -226,10 +265,16 @@ class GoogleFlightsScraper:
             # Validate inputs
             is_domestic_us = self._validate_inputs(
                 departure_code,
+                departure_country,
                 arrival_code,
+                arrival_country,
                 seat_class,
+                start_date,
+                end_date,
+                export,
+                export_type,
+                export_path,
             )
-            validate_export_params(export, export_type, export_path)
 
             # Navigate to Google Flights
             self.driver.get("https://www.google.com/travel/flights")
@@ -245,19 +290,24 @@ class GoogleFlightsScraper:
             )
 
             # Select best flights and extract details
-            result = self._select_best_flights(result)
+            result, status = self._select_best_flights(result)
 
             # Extract price relativity
-            result["price_classification"], result["price_relativity"] = extract_price_relativity(
-                self.wait, self.driver, self.wait_time
-            )
+            if status == "Ran successfully.":
+                (result["price_classification"], result["price_relativity"]) = (
+                    extract_price_relativity(self.wait, self.driver, self.wait_time)
+                )
 
         except Exception as e:
             print(f"Error scraping flight: {e}")
+            status = f"Error: {str(e)}"
         finally:
             # Close the driver
             self.driver.quit()
             time.sleep(1)
+
+        # Update status
+        result["status"] = status
 
         # Export
         if export:

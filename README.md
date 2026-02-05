@@ -41,7 +41,7 @@ See `examples/` directory for usage examples.
 
 2. Install pre-commit
    ```bash
-   pre-commit install
+   uv run pre-commit install
    ```
 
 3. Make changes
@@ -54,7 +54,7 @@ See `examples/` directory for usage examples.
 
 5. Run unit tests locally
    ```bash
-   uv run pytest
+   uv run pytest -xv
    ```
    Note: These will also run on PR.
 

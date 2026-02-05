@@ -19,7 +19,9 @@ def example_basic_search():
 
     result = scraper.scrape_flight(
         departure_code="LAX",
-        arrival_code="JFK",
+        departure_country="United States of America",
+        arrival_code="New York",
+        arrival_country="United States of America",
         start_date=start,
         end_date=end,
         seat_class="Economy (include Basic)",
@@ -38,7 +40,9 @@ def example_international_search():
 
     result = scraper.scrape_flight(
         departure_code="JFK",
+        departure_country="United States of America",
         arrival_code="LHR",
+        arrival_country="United Kingdom",
         start_date=start,
         end_date=end,
         seat_class="Premium economy",
@@ -57,7 +61,9 @@ def example_business_class():
 
     result = scraper.scrape_flight(
         departure_code="SFO",
+        departure_country="United States of America",
         arrival_code="MIA",
+        arrival_country="United States of America",
         start_date=start,
         end_date=end,
         seat_class="Business",
@@ -76,7 +82,9 @@ def example_save_to_file():
 
     json_output = scraper.scrape_flight(
         departure_code="MIA",
+        departure_country="United States of America",
         arrival_code="SEA",
+        arrival_country="United States of America",
         start_date=start,
         end_date=end,
         seat_class="Economy (include Basic)",
@@ -100,17 +108,19 @@ def example_batch_processing():
     start_3 = (today + timedelta(weeks=12)).strftime("%m/%d/%Y")
     end_3 = (today + timedelta(weeks=13)).strftime("%m/%d/%Y")
 
+    usa = "United States of America"
+
     routes = [
-        ("LAX", "JFK", start_1, end_1, "Economy (include Basic)"),
-        ("SFO", "BOS", start_2, end_2, "Business"),
-        ("SEA", "ATL", start_3, end_3, "Premium economy"),
+        ("LAX", usa, "New York", usa, start_1, end_1, "Economy (include Basic)"),
+        ("SFO", usa, "BOS", usa, start_2, end_2, "Business"),
+        ("SEA", usa, "ATL", usa, start_3, end_3, "Premium economy"),
     ]
 
     all_results = []
-    for i, (dep, arr, start, end, seat_class) in enumerate(routes, 1):
+    for i, (dep, dep_con, arr, arr_con, start, end, seat_class) in enumerate(routes, 1):
         print(f"\nProcessing route {i}/{len(routes)}: {dep} -> {arr}")
         scraper = GoogleFlightsScraper()
-        result = scraper.scrape_flight(dep, arr, start, end, seat_class)
+        result = scraper.scrape_flight(dep, dep_con, arr, arr_con, start, end, seat_class)
         all_results.append(result)
         print(f"Completed: {dep} to {arr}")
 
@@ -134,7 +144,9 @@ def example_custom_configuration():
 
     result = scraper.scrape_flight(
         departure_code="LAX",
+        departure_country="United States of America",
         arrival_code="HNL",
+        arrival_country="United States of America",
         start_date=start,
         end_date=end,
         seat_class="Economy (exclude Basic)",

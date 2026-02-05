@@ -2,51 +2,56 @@
   {
     "inputs": {
       "departure_airport": "LAX",
-      "arrival_airport": "JFK",
+      "departure_country": "United States of America",
+      "arrival_airport": "New York",
+      "arrival_country": "United States of America",
       "departure_date": "03/04/2026",
       "return_date": "03/11/2026",
       "seat_class": "Economy (include Basic)"
     },
     "departure_flight": {
-      "airline": "American",
+      "airline": "Spirit",
       "departure_airport": "Los Angeles International Airport",
       "departure_date": "Wednesday, March 4",
-      "departure_time": "6:00 AM",
+      "departure_time": "8:20 AM",
       "num_stops": 0,
       "connection_airports": [],
       "layover_durations": [],
-      "arrival_airport": "John F. Kennedy International Airport",
+      "arrival_airport": "Newark Liberty International Airport",
       "arrival_date": "Wednesday, March 4",
-      "arrival_time": "2:20 PM",
-      "duration_minutes": 320,
-      "duration_str": "5 hr 20 min",
-      "carry_on_bags": 1,
+      "arrival_time": "4:35 PM",
+      "duration_minutes": 315,
+      "duration_str": "5 hr 15 min",
+      "carry_on_bags": 0,
       "checked_bags": 0
     },
     "return_flight": {
-      "airline": "American",
-      "departure_airport": "John F. Kennedy International Airport",
+      "airline": "Spirit",
+      "departure_airport": "Newark Liberty International Airport",
       "departure_date": "Wednesday, March 11",
-      "departure_time": "3:30 PM",
+      "departure_time": "9:10 AM",
       "num_stops": 0,
       "connection_airports": [],
       "layover_durations": [],
       "arrival_airport": "Los Angeles International Airport",
       "arrival_date": "Wednesday, March 11",
-      "arrival_time": "6:40 PM",
-      "duration_minutes": 370,
-      "duration_str": "6 hr 10 min",
-      "carry_on_bags": 1,
+      "arrival_time": "12:38 PM",
+      "duration_minutes": 388,
+      "duration_str": "6 hr 28 min",
+      "carry_on_bags": 0,
       "checked_bags": 0
     },
-    "price": 237,
-    "price_classification": "cheaper",
-    "price_relativity": 85
+    "price": 141,
+    "price_classification": "typical",
+    "price_relativity": 0,
+    "status": "Ran successfully."
   },
   {
     "inputs": {
       "departure_airport": "SFO",
+      "departure_country": "United States of America",
       "arrival_airport": "BOS",
+      "arrival_country": "United States of America",
       "departure_date": "04/01/2026",
       "return_date": "04/08/2026",
       "seat_class": "Business"
@@ -58,7 +63,7 @@
       "departure_time": "10:23 PM",
       "num_stops": 1,
       "connection_airports": [
-        "Hartsfield-Jackson Atlanta International Airport in Atlanta"
+        "Hartsfield-Jackson Atlanta International Airport"
       ],
       "layover_durations": [
         "2 hr 40 min"
@@ -78,7 +83,7 @@
       "departure_time": "5:45 AM",
       "num_stops": 1,
       "connection_airports": [
-        "Hartsfield-Jackson Atlanta International Airport in Atlanta"
+        "Hartsfield-Jackson Atlanta International Airport"
       ],
       "layover_durations": [
         "7 hr 44 min"
@@ -93,12 +98,15 @@
     },
     "price": 575,
     "price_classification": null,
-    "price_relativity": null
+    "price_relativity": null,
+    "status": "Ran successfully."
   },
   {
     "inputs": {
       "departure_airport": "SEA",
+      "departure_country": "United States of America",
       "arrival_airport": "ATL",
+      "arrival_country": "United States of America",
       "departure_date": "04/29/2026",
       "return_date": "05/06/2026",
       "seat_class": "Premium economy"
@@ -110,7 +118,7 @@
       "departure_time": "6:57 PM",
       "num_stops": 1,
       "connection_airports": [
-        "Denver International Airport in Denver"
+        "Denver International Airport"
       ],
       "layover_durations": [
         "1 hr 10 min"
@@ -130,7 +138,7 @@
       "departure_time": "10:30 AM",
       "num_stops": 1,
       "connection_airports": [
-        "Los Angeles International Airport in Los Angeles"
+        "Los Angeles International Airport"
       ],
       "layover_durations": [
         "2 hr 9 min"
@@ -145,6 +153,7 @@
     },
     "price": 338,
     "price_classification": null,
-    "price_relativity": null
+    "price_relativity": null,
+    "status": "Ran successfully."
   }
 ]

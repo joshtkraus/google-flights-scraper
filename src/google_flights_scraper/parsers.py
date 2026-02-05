@@ -109,12 +109,29 @@ def extract_layover_info(flight_description: str):
     Returns:
         tuple: (connection_airports, layover_durations) as lists
     """
-    if m := re.findall(
-        r"Layover .*? is a (\d+ hr \d+ min) layover at ([^.]+?)(?:\.|$)",
-        flight_description,
-    ):
-        connection_airports = [x[1].strip() for x in m]
-        layover_durations = [x[0].strip() for x in m]
+    # Pattern for "layover at [airport name]" - handles optional minutes
+    pattern_at = (
+        r"Layover \(\d+ of \d+\) is a (\d+ hr(?: \d+ min)?) "
+        r"layover at ([^.]+?)(?:\sin\s[^.]+)?\.(?:\s|$)"
+    )
+
+    # Pattern for "layover in [city]" (for terminal transfers) - handles optional minutes
+    pattern_in = (
+        r"Layover \(\d+ of \d+\) is a (\d+ hr(?: \d+ min)?) "
+        r"layover in ([^.]+?)\.(?:\s+Transfer)?"
+    )
+
+    # Try pattern with "at" first
+    matches_at = re.findall(pattern_at, flight_description)
+    matches_in = re.findall(pattern_in, flight_description)
+
+    # pattern_at returns tuples of (duration, airport) due to 2 capturing groups
+    # pattern_in returns tuples of (duration, location)
+    all_matches = matches_at + matches_in
+
+    if all_matches:
+        layover_durations = [m[0].strip() for m in all_matches]
+        connection_airports = [m[1].strip() for m in all_matches]
         return connection_airports, layover_durations
     return [], []
 
@@ -128,12 +145,21 @@ def extract_duration(flight_description: str):
     Returns:
         tuple: (duration_minutes, duration_str) or (None, None)
     """
+    # Pattern with both hours and minutes
     if m := re.search(r"Total duration (\d+) hr (\d+) min", flight_description):
         hours = int(m.group(1))
         minutes = int(m.group(2))
         duration_minutes = hours * 60 + minutes
         duration_str = f"{hours} hr {minutes} min"
         return duration_minutes, duration_str
+
+    # Pattern with only hours (no minutes)
+    if m := re.search(r"Total duration (\d+) hr", flight_description):
+        hours = int(m.group(1))
+        duration_minutes = hours * 60
+        duration_str = f"{hours} hr"
+        return duration_minutes, duration_str
+
     return None, None
 
 
@@ -255,7 +281,7 @@ def extract_price_difference(text: str):
     elif "cheaper" in text:
         if m := re.search(r"\$(\d+)(?=\s*cheaper)", text):
             return int(m.group(1).replace(",", ""))
-        return "NA"
+        return None
     return None
 
 

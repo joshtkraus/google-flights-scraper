@@ -5,34 +5,34 @@ from selenium.webdriver.chrome.options import Options
 
 # Valid seat class options
 VALID_CLASSES_DOMESTIC_US = [
-    "Economy (include Basic)",
-    "Economy (exclude Basic)",
-    "Premium economy",
-    "Business",
-    "First",
+    "economy (include basic)",
+    "economy (exclude basic)",
+    "premium economy",
+    "business",
+    "first",
 ]
 
 VALID_CLASSES_INTERNATIONAL = [
-    "Economy",
-    "Premium economy",
-    "Business",
-    "First",
+    "economy",
+    "premium economy",
+    "business",
+    "first",
 ]
 
 # Seat class to option index mapping
 SEAT_CLASS_OPTION_MAPPING = {
     True: {  # Domestic US
-        "Economy (include Basic)": 3,
-        "Economy (exclude Basic)": 4,
-        "Premium economy": 5,
-        "Business": 6,
-        "First": 7,
+        "economy (include basic)": 3,
+        "economy (exclude basic)": 4,
+        "premium economy": 5,
+        "business": 6,
+        "first": 7,
     },
     False: {  # International
-        "Economy": 3,
-        "Premium economy": 4,
-        "Business": 5,
-        "First": 6,
+        "economy": 3,
+        "premium economy": 4,
+        "business": 5,
+        "first": 6,
     },
 }
 

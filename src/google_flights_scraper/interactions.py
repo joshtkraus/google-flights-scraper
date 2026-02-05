@@ -194,7 +194,7 @@ def select_seat_class(wait: WebDriverWait, seat_class: str, is_domestic_us: bool
     except TimeoutException as e:
         raise Exception("Error selecting seat class:") from e
 
-    option_index = SEAT_CLASS_OPTION_MAPPING[is_domestic_us][seat_class]
+    option_index = SEAT_CLASS_OPTION_MAPPING[is_domestic_us][seat_class.lower()]
     class_options[option_index].click()
 
 
@@ -252,6 +252,8 @@ def wait_until_class_stable(
             elif current_class == previous_class:
                 # Class hasn't changed, check if stable long enough
                 if time.time() - stable_since >= stable_duration:
+                    # do one last small wait
+                    time.sleep(1)
                     break
             else:
                 # Class changed, reset the timer
