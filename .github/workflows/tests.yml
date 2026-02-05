@@ -32,11 +32,10 @@ jobs:
       run: uv python install ${{ matrix.python-version }}
 
     - name: Install Google Chrome
-      steps:
-        - uses: browser-actions/setup-chrome@v2
-          with:
-            chrome-version: 120
-            install-chromedriver: true
+      uses: browser-actions/setup-chrome@v2
+      with:
+        chrome-version: 120
+        install-chromedriver: true
 
     - name: Install project and test dependencies
       run: uv sync --all-extras --dev
