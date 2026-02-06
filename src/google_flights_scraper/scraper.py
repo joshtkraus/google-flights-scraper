@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 import pandas as pd
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.support.wait import WebDriverWait
 
 from .config_browser import DEFAULT_WAIT_TIME, setup_chrome_driver
@@ -15,7 +16,12 @@ from .interactions import (
     press_search_button,
     select_seat_class,
 )
-from .parsers import create_empty_flight_info, extract_flight_details, extract_price_relativity
+from .parsers import (
+    create_empty_flight_info,
+    extract_final_price,
+    extract_flight_details,
+    extract_price_relativity,
+)
 from .validators import (
     is_domestic_us_flight,
     validate_airport_code,
@@ -75,8 +81,10 @@ class GoogleFlightsScraper:
             "return_flight": create_empty_flight_info(),
             "price": None,
             "price_classification": None,
+            "price_difference": None,
             "price_relativity": None,
             "status": None,
+            "url": None,
         }
 
     def _validate_inputs(
@@ -88,8 +96,6 @@ class GoogleFlightsScraper:
         seat_class: str,
         start_date: str,
         end_date: str,
-        export: bool,
-        export_type: str | None,
         export_path: str | None,
     ):
         """Validate all input parameters.
@@ -102,8 +108,6 @@ class GoogleFlightsScraper:
             seat_class (str): Seat class string
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
-            export (bool): Whether to export the result dictionary or not. Defaults to false
-            export_type (str | None): Type of export, required if export is True
             export_path (str | None): Path to export, required if export is True
 
         Returns:
@@ -127,7 +131,7 @@ class GoogleFlightsScraper:
         validate_dates(start_date, end_date)
 
         # Validate export params
-        validate_export_params(export, export_type, export_path)
+        validate_export_params(export_path)
 
         return is_domestic_us
 
@@ -162,6 +166,44 @@ class GoogleFlightsScraper:
         # Click search button
         press_search_button(self.wait)
 
+    def _find_flight_with_retry(
+        self,
+        result: dict,
+        key: str,
+        max_retries: int = 3,
+        sleep_s: float = 0.5,
+    ):
+        """Find best flight element with retry and extract details.
+
+        Args:
+            result (dict): Dictionary to populate with flight details
+            key (str): Dict key to add data to (departure or return flight)
+            max_retries (int): Number of times to retry selecting element
+            sleep_s (float): How long to sleep (seconds) in between each try
+
+        Returns:
+            WebElement | None
+        """
+        for attempt in range(max_retries):
+            try:
+                flight = find_and_select_best_flight(
+                    self.wait,
+                    self.driver,
+                    self.wait_time,
+                )
+
+                if flight is None:
+                    return None, f"No {key} found."
+
+                result[key] = extract_flight_details(flight)
+                flight.click()
+                return None
+
+            except StaleElementReferenceException:
+                if attempt == max_retries - 1:
+                    return f"No {key} found."
+                time.sleep(sleep_s)
+
     def _select_best_flights(self, result: dict):
         """Select the best departure and return flights and extract details.
 
@@ -171,52 +213,57 @@ class GoogleFlightsScraper:
         Returns:
             tuple: (updated result dictionary, success status message)
         """
-        # Find and select best departure flight
-        best_departure = find_and_select_best_flight(
-            self.wait,
-            self.driver,
-            self.wait_time,
+        # Select Departure
+        err = self._find_flight_with_retry(
+            result,
+            key="departure_flight",
         )
-        if best_departure is None:
-            return result, "No departure flights found."
+        if err:
+            return result, err
 
-        # Extract flight details
-        result["departure_flight"], result["price"] = extract_flight_details(best_departure)
-
-        # Select flight
-        best_departure.click()
-
-        # Find and select best return flight
-        best_return = find_and_select_best_flight(
-            self.wait,
-            self.driver,
-            self.wait_time,
+        # Select Return
+        err = self._find_flight_with_retry(
+            result,
+            key="return_flight",
         )
-        if best_return is None:
-            return result, "No return flights found."
+        if err:
+            return result, err
 
-        # Extract flight details
-        result["return_flight"], result["price"] = extract_flight_details(best_return)
+        # Extract price from final booking page
+        result["price"] = extract_final_price(self.wait, self.driver, self.wait_time)
 
-        # Select flight
-        best_return.click()
+        # Capture the final page URL
+        result["url"] = self.driver.current_url
 
         return result, "Ran successfully."
 
-    def _export_data(self, result: dict, export_type: str | None, export_path: str | None):
-        """Export dict to file in desired format.
+    def _calc_price_rel(self, price: int, price_difference: int | None):
+        """Calculate price relaticity (% discount).
+
+        Args:
+            price (int): Final flight price
+            price_difference (int | None): If found, how much cheaper flight is than usual
+
+        Returns:
+            float: Percentage discount
+        """
+        if price_difference is not None:
+            return round(float(price_difference / (price + price_difference)), 4)
+        else:
+            return None
+
+    def _export_data(self, result: dict, export_path: str):
+        """Export dict to file based on extension.
 
         Args:
             result (dict): Resulting dictionary after scraping
-            export_type (str | None): Type of export ('json', 'csv')
-            export_path (str | None): Path to export file to
+            export_path (str): Path to export file to
         """
-        if (export_type == "json") and (export_path):
+        if export_path.endswith(".json"):
             json_output = json.dumps(result, indent=2)
             with open(export_path, "w") as f:
                 f.write(json_output)
-
-        if (export_type == "csv") and (export_path):
+        elif export_path.endswith(".csv"):
             df = pd.json_normalize(result, sep="_")
             df.to_csv(export_path, index=False)
 
@@ -229,8 +276,6 @@ class GoogleFlightsScraper:
         start_date: str,
         end_date: str,
         seat_class: str,
-        export: bool = False,
-        export_type: str | None = None,
         export_path: str | None = None,
     ):
         """Scrape Google Flights for specified route and parameters.
@@ -243,8 +288,6 @@ class GoogleFlightsScraper:
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
             seat_class (str): Seat class (e.g., "Economy (include Basic)", "Business", etc.)
-            export (bool): Whether to export the result dictionary or not. Defaults to false
-            export_type (str | None): Type of export, required if export is True
             export_path (str | None): Path to export, required if export is True
 
         Returns:
@@ -271,8 +314,6 @@ class GoogleFlightsScraper:
                 seat_class,
                 start_date,
                 end_date,
-                export,
-                export_type,
                 export_path,
             )
 
@@ -292,11 +333,16 @@ class GoogleFlightsScraper:
             # Select best flights and extract details
             result, status = self._select_best_flights(result)
 
-            # Extract price relativity
+            # Extract price difference
             if status == "Ran successfully.":
-                (result["price_classification"], result["price_relativity"]) = (
+                (result["price_classification"], result["price_difference"]) = (
                     extract_price_relativity(self.wait, self.driver, self.wait_time)
                 )
+
+            # Calculate price relativity
+            result["price_relativity"] = self._calc_price_rel(
+                result["price"], result["price_difference"]
+            )
 
         except Exception as e:
             print(f"Error scraping flight: {e}")
@@ -310,7 +356,7 @@ class GoogleFlightsScraper:
         result["status"] = status
 
         # Export
-        if export:
-            self._export_data(result, export_type, export_path)
+        if export_path:
+            self._export_data(result, export_path)
 
         return result

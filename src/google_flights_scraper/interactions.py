@@ -219,7 +219,7 @@ def press_search_button(wait: WebDriverWait):
 
 
 def wait_until_class_stable(
-    driver: Chrome, locator: tuple, stable_duration: float = 1.0, timeout: int = 10
+    driver: Chrome, locator: tuple, stable_duration: float = 2.0, timeout: int = 20
 ):
     """Wait until an element's class attribute stops changing.
 
@@ -235,6 +235,7 @@ def wait_until_class_stable(
     start_time = time.time()
     previous_class = None
     first_read = True
+    stable_since = None
 
     while True:
         if time.time() - start_time > timeout:
@@ -250,11 +251,12 @@ def wait_until_class_stable(
                 stable_since = time.time()
                 first_read = False
             elif current_class == previous_class:
-                # Class hasn't changed, check if stable long enough
-                if time.time() - stable_since >= stable_duration:
-                    # do one last small wait
-                    time.sleep(1)
-                    break
+                if stable_since is not None:
+                    # Class hasn't changed, check if stable long enough
+                    if time.time() - stable_since >= stable_duration:
+                        # do one last small wait
+                        time.sleep(1)
+                        break
             else:
                 # Class changed, reset the timer
                 previous_class = current_class
@@ -285,7 +287,7 @@ def find_and_select_best_flight(wait: WebDriverWait, driver: Chrome, timeout: in
     wait_until_class_stable(
         driver,
         (By.XPATH, "//div[@role='progressbar']"),
-        stable_duration=1.0,
+        stable_duration=2.0,
         timeout=timeout,
     )
 

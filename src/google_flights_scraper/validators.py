@@ -27,28 +27,19 @@ def validate_dates(start_date: str, end_date: str):
         raise ValueError(f"Return date ({end_date}) must be after departure date ({start_date})")
 
 
-def validate_export_params(export: bool = False, export_type: str = None, export_path: str = None):
-    """Validate that required params are passed for export.
+def validate_export_params(export_path: str | None = None):
+    """Validate export parameters.
 
     Args:
-        export (bool): Whether to export the result dictionary or not. Defaults to false
-        export_type (str): Type of export, required if export is True
-        export_path (str): Path to export, required if export is True
+        export_path (str | None): Path to export file
 
     Raises:
-        ValueError: If required params are not passed
+        ValueError: If export_path has invalid extension
     """
-    if export:
-        missing = []
-        if export_type is None:
-            missing.append("export_type")
-        if export_path is None:
-            missing.append("export_path")
-        if missing:
-            raise ValueError(f"export is True, but {missing} not defined")
-
-        if export_type not in ["json", "csv"]:
-            raise ValueError(f"Unsupported export type {export_type}")
+    if export_path:
+        # Check file extension
+        if not (export_path.endswith(".json") or export_path.endswith(".csv")):
+            raise ValueError(f"Export path must end with .json or .csv, got: {export_path}")
 
 
 def validate_airport_code(airport_code: str, airport_codes_df: DataFrame):
