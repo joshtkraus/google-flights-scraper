@@ -72,6 +72,7 @@ markdown_extensions:
   - attr_list
 
 nav:
+  - Home: README.md
   - Simple Request: tutorial/simple_request.ipynb
   - Batch Request: tutorial/batch_request.ipynb
   - Code Reference: reference/
