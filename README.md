@@ -5,9 +5,15 @@
 
 # Google Flights Web Scraper
 
-A Python-based web scraper for Google Flights using Selenium that collects flight information including prices, times, airlines, connections, and price relativity.
+A Python-based end-to-end web scraping of Google Flights using Selenium selecting the "best" flight options, and collecting flight information including prices, times, airlines, connections, and price relativity.
 
-See `examples/` directory for usage examples.
+## Use Cases
+- Single Search: Enter a departure and arrival destination along with departure and return dates, recieve information for the flight options that Google Flights deems are "best".
+- Multiple Destinations: Search multiple destinations on certain dates. Helpful if you know when you want to travel, but don't know where and are looking for good deals.
+- Multiple Dates: Search all date combinations for a specific route between certain dates. Helpful if you're flexible on timing and looking for finding cheaper days to fly.
+
+## Examples
+See `docs/tutorial` for usage examples.
 
 ## Installation
 1. **Install UV:**
