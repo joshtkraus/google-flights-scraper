@@ -1604,7 +1604,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-1">
@@ -1669,10 +1669,10 @@ today = datetime.today()</div>
 <code>arrival_countries</code> : The matching list of possible destination countries<br/>
 <code>start_date</code> : Departure date (in <code>"MM/DD/YYY"</code> format)
 <code>end_date</code> : Arrrival date  (in <code>"MM/DD/YYY"</code> format)
-<code>seat_classes</code> : The matching list of seat classes (reason this is <code>list</code> and not <code>str</code> is because domestic and international flights can have different class names)<br/>
-<code>output_path</code> : path to output <code>.csv</code></p>
+<code>seat_classes</code> : The matching list of seat classes (reason this is <code>list</code> and not <code>str</code> is because domestic and international flights can have different class names)</p>
 <p><strong>Optional Inputs</strong></p>
-<p><code>delay_seconds</code>: How many seconds to delay between requests. Can be helpful to increase if you are being rate limited by Google.</p>
+<p><code>output_path</code> : path to output <code>.csv</code>  (ex: <code>export.csv</code>)
+<code>delay_seconds</code>: How many seconds to delay between requests. Can be helpful to increase if you are being rate limited by Google.</p>
 </div>
 </div>
 </div>
@@ -1687,13 +1687,13 @@ today = datetime.today()</div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=a2e77e1c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a2e77e1c">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-2">
@@ -1732,7 +1732,6 @@ today = datetime.today()</div>
     <span class="n">start_date</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
     <span class="n">end_date</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
     <span class="n">seat_classes</span><span class="o">=</span><span class="n">seat_classes</span><span class="p">,</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="s2">"../../data/destination_search_results.csv"</span><span class="p">,</span>
     <span class="n">delay_seconds</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -1762,21 +1761,37 @@ df_destinations = scrape_multiple_destinations(
     start_date=start,
     end_date=end,
     seat_classes=seat_classes,
-    output_path="../../data/destination_search_results.csv",
     delay_seconds=3.0,
 )</div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>[1/4] Searching New York → SEA (Economy (exclude Basic))...
+[2/4] Searching New York → London (Economy)...
+[3/4] Searching New York → Paris (Economy)...
+[4/4] Searching New York → SFO (Economy (exclude Basic))...
+Total searches: 4, Successful: 4
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=11234916">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=4b042d01">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-3">
@@ -1801,7 +1816,7 @@ df_destinations = scrape_multiple_destinations(
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -1832,16 +1847,16 @@ df_destinations = scrape_multiple_destinations(
 <th>departure_departure_airport</th>
 <th>departure_departure_date</th>
 <th>...</th>
-<th>return_arrival_date</th>
-<th>return_arrival_time</th>
 <th>return_duration_minutes</th>
 <th>return_duration_str</th>
 <th>return_carry_on_bags</th>
 <th>return_checked_bags</th>
 <th>price</th>
 <th>price_classification</th>
+<th>price_difference</th>
 <th>price_relativity</th>
 <th>status</th>
+<th>url</th>
 </tr>
 </thead>
 <tbody>
@@ -1851,23 +1866,23 @@ df_destinations = scrape_multiple_destinations(
 <td>United States of America</td>
 <td>SFO</td>
 <td>United States of America</td>
-<td>04/02/2026</td>
-<td>04/16/2026</td>
+<td>04/03/2026</td>
+<td>04/17/2026</td>
 <td>Economy (exclude Basic)</td>
 <td>JetBlue</td>
 <td>John F. Kennedy International Airport</td>
-<td>Thursday, April 2</td>
+<td>Friday, April 3</td>
 <td>...</td>
-<td>Thursday, April 16</td>
-<td>11:29 PM</td>
 <td>344</td>
 <td>5 hr 44 min</td>
 <td>1.0</td>
 <td>0.0</td>
 <td>418</td>
-<td>cheaper</td>
-<td>533</td>
+<td>low</td>
+<td>525</td>
+<td>0.5567</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 </tr>
 <tr>
 <th>0</th>
@@ -1875,23 +1890,23 @@ df_destinations = scrape_multiple_destinations(
 <td>United States of America</td>
 <td>SEA</td>
 <td>United States of America</td>
-<td>04/02/2026</td>
-<td>04/16/2026</td>
+<td>04/03/2026</td>
+<td>04/17/2026</td>
 <td>Economy (exclude Basic)</td>
-<td>United</td>
-<td>Newark Liberty International Airport</td>
-<td>Thursday, April 2</td>
+<td>Alaska</td>
+<td>John F. Kennedy International Airport</td>
+<td>Friday, April 3</td>
 <td>...</td>
-<td>Thursday, April 16</td>
-<td>8:29 PM</td>
 <td>321</td>
 <td>5 hr 21 min</td>
 <td>1.0</td>
 <td>0.0</td>
-<td>405</td>
-<td>cheaper</td>
-<td>426</td>
+<td>375</td>
+<td>low</td>
+<td>427</td>
+<td>0.5324</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 </tr>
 <tr>
 <th>2</th>
@@ -1899,23 +1914,23 @@ df_destinations = scrape_multiple_destinations(
 <td>United States of America</td>
 <td>Paris</td>
 <td>France</td>
-<td>04/02/2026</td>
-<td>04/16/2026</td>
+<td>04/03/2026</td>
+<td>04/17/2026</td>
 <td>Economy</td>
-<td>Lufthansa</td>
-<td>Newark Liberty International Airport</td>
-<td>Thursday, April 2</td>
+<td>American</td>
+<td>John F. Kennedy International Airport</td>
+<td>Friday, April 3</td>
 <td>...</td>
-<td>Thursday, April 16</td>
-<td>3:35 PM</td>
-<td>505</td>
-<td>8 hr 25 min</td>
+<td>730</td>
+<td>12 hr 10 min</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>617</td>
-<td>cheaper</td>
-<td>260</td>
+<td>566</td>
+<td>low</td>
+<td>220</td>
+<td>0.2799</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 </tr>
 <tr>
 <th>1</th>
@@ -1923,27 +1938,27 @@ df_destinations = scrape_multiple_destinations(
 <td>United States of America</td>
 <td>London</td>
 <td>United Kingdom</td>
-<td>04/02/2026</td>
-<td>04/16/2026</td>
+<td>04/03/2026</td>
+<td>04/17/2026</td>
 <td>Economy</td>
 <td>Norse Atlantic UK</td>
 <td>John F. Kennedy International Airport</td>
-<td>Thursday, April 2</td>
+<td>Friday, April 3</td>
 <td>...</td>
-<td>Thursday, April 16</td>
-<td>3:55 PM</td>
 <td>470</td>
 <td>7 hr 50 min</td>
 <td>NaN</td>
 <td>NaN</td>
-<td>580</td>
+<td>532</td>
 <td>typical</td>
 <td>0</td>
+<td>0.0000</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 </tr>
 </tbody>
 </table>
-<p>4 rows × 39 columns</p>
+<p>4 rows × 41 columns</p>
 </div>
 </div>
 </div>
@@ -1957,7 +1972,7 @@ df_destinations = scrape_multiple_destinations(
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This returns a pandas DataFrame (in-memory, also exported to <code>.csv</code>) of the best flight for each destination, sorted in order of <code>price_relativity</code> highlight the flights which are the "best deal".</p>
+<p>This returns a pandas DataFrame of the best flight for each destination, sorted in order of <code>price_relativity</code> highlight the flights which are the "best deal".</p>
 <p>This also contains all the other information returned by the basic flight request function.</p>
 </div>
 </div>
@@ -1990,10 +2005,10 @@ df_destinations = scrape_multiple_destinations(
 <code>end_date_range</code> : End date for search (in <code>"MM/DD/YYY"</code> format)<br/>
 <code>min_trip_length</code> : Minimum trip length (in days)<br/>
 <code>max_trip_length</code> : Maximum trip length (in days)<br/>
-<code>seat_class</code> : Class of seat (a single selection)<br/>
-<code>output_path</code> : path to output <code>.csv</code></p>
+<code>seat_class</code> : Class of seat (a single selection)</p>
 <p><strong>Optional Inputs</strong></p>
-<p><code>delay_seconds</code>: How many seconds to delay between requests. Can be helpful to increase if you are being rate limited by Google.</p>
+<p><code>output_path</code> : path to output <code>.csv</code>  (ex: <code>export.csv</code>)
+<code>delay_seconds</code>: How many seconds to delay between requests. Can be helpful to increase if you are being rate limited by Google.</p>
 </div>
 </div>
 </div>
@@ -2008,13 +2023,13 @@ df_destinations = scrape_multiple_destinations(
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=f3af40ee">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f3af40ee">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-4">
@@ -2042,7 +2057,6 @@ df_destinations = scrape_multiple_destinations(
     <span class="n">min_trip_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
     <span class="n">max_trip_length</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
     <span class="n">seat_class</span><span class="o">=</span><span class="s2">"Economy"</span><span class="p">,</span>
-    <span class="n">output_path</span><span class="o">=</span><span class="s2">"../../data/date_range_results.csv"</span><span class="p">,</span>
     <span class="n">delay_seconds</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
@@ -2061,9 +2075,27 @@ df_dates = scrape_date_range(
     min_trip_length=5,
     max_trip_length=7,
     seat_class="Economy",
-    output_path="../../data/date_range_results.csv",
     delay_seconds=3.0,
 )</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>[1/6] Searching 04/24/2026 → 04/29/2026...
+[2/6] Searching 04/24/2026 → 04/30/2026...
+[3/6] Searching 04/24/2026 → 05/01/2026...
+[4/6] Searching 04/25/2026 → 04/30/2026...
+[5/6] Searching 04/25/2026 → 05/01/2026...
+[6/6] Searching 04/26/2026 → 05/01/2026...
+Total searches: 6, Successful: 6
+</pre>
 </div>
 </div>
 </div>
@@ -2075,7 +2107,7 @@ df_dates = scrape_date_range(
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="CodeMirror cm-s-jupyter">
 <div class="zeroclipboard-container">
 <clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-5">
@@ -2100,7 +2132,7 @@ df_dates = scrape_date_range(
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -2131,93 +2163,93 @@ df_dates = scrape_date_range(
 <th>departure_departure_airport</th>
 <th>departure_departure_date</th>
 <th>...</th>
-<th>return_arrival_time</th>
-<th>return_duration_minutes</th>
 <th>return_duration_str</th>
 <th>return_carry_on_bags</th>
 <th>return_checked_bags</th>
 <th>price</th>
 <th>price_classification</th>
+<th>price_difference</th>
 <th>price_relativity</th>
 <th>status</th>
+<th>url</th>
 <th>trip_length_days</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th>1</th>
+<th>5</th>
 <td>JFK</td>
 <td>United States of America</td>
 <td>London</td>
 <td>United Kingdom</td>
-<td>04/23/2026</td>
-<td>04/29/2026</td>
+<td>04/26/2026</td>
+<td>05/01/2026</td>
 <td>Economy</td>
-<td>American</td>
+<td>British Airways</td>
 <td>John F. Kennedy International Airport</td>
-<td>Thursday, April 23</td>
+<td>Sunday, April 26</td>
 <td>...</td>
-<td>6:55 PM</td>
-<td>745</td>
-<td>12 hr 25 min</td>
+<td>7 hr 50 min</td>
 <td>None</td>
 <td>None</td>
-<td>516</td>
-<td>cheaper</td>
-<td>222</td>
+<td>544</td>
+<td>low</td>
+<td>382</td>
+<td>0.4125</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
+<td>5</td>
+</tr>
+<tr>
+<th>4</th>
+<td>JFK</td>
+<td>United States of America</td>
+<td>London</td>
+<td>United Kingdom</td>
+<td>04/25/2026</td>
+<td>05/01/2026</td>
+<td>Economy</td>
+<td>Norse Atlantic UK</td>
+<td>John F. Kennedy International Airport</td>
+<td>Saturday, April 25</td>
+<td>...</td>
+<td>7 hr 50 min</td>
+<td>None</td>
+<td>None</td>
+<td>370</td>
+<td>low</td>
+<td>196</td>
+<td>0.3463</td>
+<td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 <td>6</td>
 </tr>
 <tr>
-<th>3</th>
+<th>2</th>
 <td>JFK</td>
 <td>United States of America</td>
 <td>London</td>
 <td>United Kingdom</td>
 <td>04/24/2026</td>
-<td>04/29/2026</td>
+<td>05/01/2026</td>
 <td>Economy</td>
-<td>American</td>
+<td>Norse Atlantic UK</td>
 <td>John F. Kennedy International Airport</td>
 <td>Friday, April 24</td>
 <td>...</td>
-<td>6:55 PM</td>
-<td>745</td>
-<td>12 hr 25 min</td>
-<td>None</td>
-<td>None</td>
-<td>516</td>
-<td>cheaper</td>
-<td>177</td>
-<td>Ran successfully.</td>
-<td>5</td>
-</tr>
-<tr>
-<th>0</th>
-<td>JFK</td>
-<td>United States of America</td>
-<td>London</td>
-<td>United Kingdom</td>
-<td>04/23/2026</td>
-<td>04/28/2026</td>
-<td>Economy</td>
-<td>American</td>
-<td>John F. Kennedy International Airport</td>
-<td>Thursday, April 23</td>
-<td>...</td>
-<td>5:00 PM</td>
-<td>470</td>
 <td>7 hr 50 min</td>
 <td>None</td>
 <td>None</td>
-<td>544</td>
-<td>cheaper</td>
-<td>147</td>
+<td>414</td>
+<td>low</td>
+<td>152</td>
+<td>0.2686</td>
 <td>Ran successfully.</td>
-<td>5</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
+<td>7</td>
 </tr>
 <tr>
-<th>5</th>
+<th>3</th>
 <td>JFK</td>
 <td>United States of America</td>
 <td>London</td>
@@ -2229,43 +2261,43 @@ df_dates = scrape_date_range(
 <td>John F. Kennedy International Airport</td>
 <td>Saturday, April 25</td>
 <td>...</td>
-<td>3:55 PM</td>
-<td>470</td>
 <td>7 hr 50 min</td>
 <td>None</td>
 <td>None</td>
-<td>439</td>
-<td>cheaper</td>
-<td>112</td>
+<td>413</td>
+<td>low</td>
+<td>138</td>
+<td>0.2505</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 <td>5</td>
 </tr>
 <tr>
-<th>2</th>
+<th>0</th>
 <td>JFK</td>
 <td>United States of America</td>
 <td>London</td>
 <td>United Kingdom</td>
-<td>04/23/2026</td>
-<td>04/30/2026</td>
+<td>04/24/2026</td>
+<td>04/29/2026</td>
 <td>Economy</td>
 <td>American</td>
 <td>John F. Kennedy International Airport</td>
-<td>Thursday, April 23</td>
+<td>Friday, April 24</td>
 <td>...</td>
-<td>12:29 PM</td>
-<td>624</td>
-<td>10 hr 24 min</td>
+<td>7 hr 50 min</td>
 <td>None</td>
 <td>None</td>
-<td>528</td>
-<td>cheaper</td>
-<td>96</td>
+<td>544</td>
+<td>low</td>
+<td>148</td>
+<td>0.2139</td>
 <td>Ran successfully.</td>
-<td>7</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
+<td>5</td>
 </tr>
 <tr>
-<th>4</th>
+<th>1</th>
 <td>JFK</td>
 <td>United States of America</td>
 <td>London</td>
@@ -2277,20 +2309,20 @@ df_dates = scrape_date_range(
 <td>John F. Kennedy International Airport</td>
 <td>Friday, April 24</td>
 <td>...</td>
-<td>3:55 PM</td>
-<td>470</td>
 <td>7 hr 50 min</td>
 <td>None</td>
 <td>None</td>
-<td>458</td>
+<td>457</td>
 <td>typical</td>
 <td>0</td>
+<td>0.0000</td>
 <td>Ran successfully.</td>
+<td>https://www.google.com/travel/flights/booking?...</td>
 <td>6</td>
 </tr>
 </tbody>
 </table>
-<p>6 rows × 40 columns</p>
+<p>6 rows × 42 columns</p>
 </div>
 </div>
 </div>
@@ -2304,7 +2336,7 @@ df_dates = scrape_date_range(
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This also returns a pandas DataFrame (in-memory, also exported to <code>.csv</code>) of the best flight for each destination, sorted in order of <code>price_relativity</code> highlight the flights which are the "best deal".</p>
+<p>This also returns a pandas DataFrame of the best flight for each destination, sorted in order of <code>price_relativity</code> highlight the flights which are the "best deal".</p>
 <p>This also contains all the other information returned by the basic flight request function.</p>
 </div>
 </div>
