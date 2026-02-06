@@ -56,8 +56,6 @@ plugins:
             filters:
               - "!^_"
             docstring_style: google
-            docstring_options:
-              return_named_value: false
 
 markdown_extensions:
   - pymdownx.highlight:
