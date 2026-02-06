@@ -219,7 +219,7 @@ def extract_flight_details(flight_element: WebElement):
     # Get flight description and clean
     flight_description = flight_element.find_element(
         By.XPATH,
-        "//div[starts-with(@aria-label, 'From ')]",
+        ".//div[starts-with(@aria-label, 'From ')]",
     ).get_attribute("aria-label")
     flight_description = flight_description.replace("\u202f", " ").replace("\xa0", " ")
 
