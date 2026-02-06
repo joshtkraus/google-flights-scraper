@@ -76,49 +76,48 @@ def test_empty_date_strings():
 
 
 # Export parameter validation tests
-def test_export_false_no_params():
-    """Test that export=False doesn't require other params."""
-    validate_export_params(export=False)  # Should not raise
+def test_export_no_path():
+    """Test that no export_path doesn't raise."""
+    validate_export_params()  # Should not raise
 
 
-def test_export_true_with_valid_json():
-    """Test that export=True with valid json params passes."""
-    validate_export_params(export=True, export_type="json", export_path="/tmp/output.json")
+def test_export_none_path():
+    """Test that None export_path doesn't raise."""
+    validate_export_params(export_path=None)  # Should not raise
 
 
-def test_export_true_with_valid_csv():
-    """Test that export=True with valid csv params passes."""
-    validate_export_params(export=True, export_type="csv", export_path="/tmp/output.csv")
+def test_export_valid_json_path():
+    """Test that valid json path passes."""
+    validate_export_params(export_path="/tmp/output.json")  # Should not raise
 
 
-def test_export_true_missing_type():
-    """Test that export=True without export_type raises ValueError."""
+def test_export_valid_csv_path():
+    """Test that valid csv path passes."""
+    validate_export_params(export_path="/tmp/output.csv")  # Should not raise
+
+
+def test_export_invalid_extension():
+    """Test that invalid file extension raises ValueError."""
     with pytest.raises(ValueError):
-        validate_export_params(export=True, export_path="/tmp/output.json")
+        validate_export_params(export_path="/tmp/output.xml")
 
 
-def test_export_true_missing_path():
-    """Test that export=True without export_path raises ValueError."""
+def test_export_no_extension():
+    """Test that path without extension raises ValueError."""
     with pytest.raises(ValueError):
-        validate_export_params(export=True, export_type="json")
+        validate_export_params(export_path="/tmp/output")
 
 
-def test_export_true_missing_both():
-    """Test that export=True without both params raises ValueError."""
+def test_export_txt_extension():
+    """Test that .txt extension raises ValueError."""
     with pytest.raises(ValueError):
-        validate_export_params(export=True)
+        validate_export_params(export_path="/tmp/output.txt")
 
 
-def test_invalid_export_type():
-    """Test that invalid export_type raises ValueError."""
+def test_export_uppercase_extension():
+    """Test that uppercase extension (.CSV, .JSON) raises ValueError."""
     with pytest.raises(ValueError):
-        validate_export_params(export=True, export_type="xml", export_path="/tmp/output.xml")
-
-
-def test_invalid_export_type_case_sensitive():
-    """Test that export_type is case sensitive."""
-    with pytest.raises(ValueError):
-        validate_export_params(export=True, export_type="JSON", export_path="/tmp/output.json")
+        validate_export_params(export_path="/tmp/output.CSV")
 
 
 # Airport code validation tests

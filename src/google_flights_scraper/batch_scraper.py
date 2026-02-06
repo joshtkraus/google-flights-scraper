@@ -16,7 +16,7 @@ def scrape_multiple_destinations(
     start_date: str,
     end_date: str,
     seat_classes: list[str],
-    output_path: str,
+    output_path: str | None = None,
     delay_seconds: float = 3.0,
 ):
     """Scrape multiple destinations with fixed dates.
@@ -29,7 +29,7 @@ def scrape_multiple_destinations(
         start_date (str): Departure date in MM/DD/YYYY format
         end_date (str): Return date in MM/DD/YYYY format
         seat_classes (list[str]): List of seat classes (same length as arrival_codes)
-        output_path (str): Path to save CSV output
+        output_path (str | None): Optional path to save CSV output
         delay_seconds (float): Delay between searches in seconds (default 3.0)
 
     Returns:
@@ -95,7 +95,8 @@ def scrape_multiple_destinations(
         df = df.sort_values("price_relativity", ascending=False, na_position="last")
 
     # Save to CSV
-    df.to_csv(output_path, index=False)
+    if output_path:
+        df.to_csv(output_path, index=False)
     successful = df["status"].str.contains("success", case=False, na=False).sum()
     print(f"Total searches: {total}, Successful: {successful}")
 
@@ -112,7 +113,7 @@ def scrape_date_range(
     min_trip_length: int,
     max_trip_length: int,
     seat_class: str,
-    output_path: str,
+    output_path: str | None = None,
     delay_seconds: float = 3.0,
 ):
     """Scrape all date combinations within a date range.
@@ -127,7 +128,7 @@ def scrape_date_range(
         min_trip_length (int): Minimum trip length in days
         max_trip_length (int): Maximum trip length in days
         seat_class (str): Seat class
-        output_path (str): Path to save CSV output
+        output_path (str | None): Optional path to save CSV output
         delay_seconds (float): Delay between searches in seconds (default 3.0)
 
     Returns:
@@ -205,7 +206,8 @@ def scrape_date_range(
         df = df.sort_values("price_relativity", ascending=False, na_position="last")
 
     # Save to CSV
-    df.to_csv(output_path, index=False)
+    if output_path:
+        df.to_csv(output_path, index=False)
     successful = df["status"].str.contains("success", case=False, na=False).sum()
     print(f"Total searches: {total}, Successful: {successful}")
 
@@ -241,7 +243,9 @@ def _flatten_result(result: dict) -> dict:
     # Add price and status info
     flat["price"] = result.get("price")
     flat["price_classification"] = result.get("price_classification")
+    flat["price_difference"] = result.get("price_difference")
     flat["price_relativity"] = result.get("price_relativity")
     flat["status"] = result.get("status")
+    flat["url"] = result.get("url")
 
     return flat

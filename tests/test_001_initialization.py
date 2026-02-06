@@ -21,3 +21,10 @@ def test_results_return(scraper_fixture, request):
     result = request.getfixturevalue(scraper_fixture)
     assert isinstance(result, dict)
     assert len(result.keys()) > 0
+
+@pytest.mark.parametrize("scraper_fixture", RESULTS)
+def test_results_url(scraper_fixture, request):
+    """Test that scraper returns final url."""
+    result = request.getfixturevalue(scraper_fixture)
+    assert isinstance(result["url"], str)
+    assert result["url"] != ""

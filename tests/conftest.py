@@ -10,7 +10,7 @@ today = datetime.today()
 
 
 @pytest.fixture(scope="session")
-def domestic_economy_basic(tmp_path_factory):
+def domestic_economy_basic():
     """Domestic flight from LAX to New York with Basic Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
