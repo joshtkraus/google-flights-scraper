@@ -36,7 +36,7 @@ SEAT_CLASS_OPTION_MAPPING = {
 }
 
 # Default timeout (ms)
-DEFAULT_TIMEOUT = 10000  # 10 seconds
+DEFAULT_TIMEOUT = 2000  # 2 seconds
 
 
 def setup_browser(
