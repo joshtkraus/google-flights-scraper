@@ -267,6 +267,7 @@ def _extract_attribute_with_retry(
     for attempt in range(max_retries):
         try:
             element = page.locator(selector)
+            element.first.wait_for(state="attached", timeout=500)
             return element.first.get_attribute(attribute)
 
         except PlaywrightTimeoutError:
@@ -333,6 +334,7 @@ def _extract_text_with_retry(
     for attempt in range(max_retries):
         try:
             element = page.locator(selector)
+            element.first.wait_for(state="attached", timeout=500)
             return element.first.inner_text()
 
         except PlaywrightTimeoutError:
