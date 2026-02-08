@@ -1265,8 +1265,7 @@
 <span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
-<span class="normal"><a href="#__codelineno-0-381">381</a></span>
-<span class="normal"><a href="#__codelineno-0-382">382</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">class</span><span class="w"> </span><span class="nc">GoogleFlightsScraper</span><span class="p">:</span>
+<span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-34" name="__codelineno-0-34"></a><span class="k">class</span><span class="w"> </span><span class="nc">GoogleFlightsScraper</span><span class="p">:</span>
 <a id="__codelineno-0-35" name="__codelineno-0-35"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Web scraper for Google Flights using Playwright.&quot;&quot;&quot;</span>
 <a id="__codelineno-0-36" name="__codelineno-0-36"></a>
 <a id="__codelineno-0-37" name="__codelineno-0-37"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1437,7 +1436,7 @@
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a><span class="sd">        &quot;&quot;&quot;</span>
 <a id="__codelineno-0-203" name="__codelineno-0-203"></a>        <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span><span class="p">):</span>
 <a id="__codelineno-0-204" name="__codelineno-0-204"></a>            <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a>                <span class="n">flight</span> <span class="o">=</span> <span class="n">find_and_select_best_flight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_page</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">DEFAULT_TIMEOUT</span><span class="p">)</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a>                <span class="n">flight</span> <span class="o">=</span> <span class="n">find_and_select_best_flight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_page</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">wait_time</span><span class="p">)</span>
 <a id="__codelineno-0-206" name="__codelineno-0-206"></a>
 <a id="__codelineno-0-207" name="__codelineno-0-207"></a>                <span class="k">if</span> <span class="n">flight</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 <a id="__codelineno-0-208" name="__codelineno-0-208"></a>                    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;No </span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"> found.&quot;</span>
@@ -1563,7 +1562,7 @@
 <a id="__codelineno-0-328" name="__codelineno-0-328"></a>            <span class="p">)</span>
 <a id="__codelineno-0-329" name="__codelineno-0-329"></a>
 <a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="c1"># Setup browser</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">=</span> <span class="n">setup_browser</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">=</span> <span class="n">setup_browser</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a>
 <a id="__codelineno-0-333" name="__codelineno-0-333"></a>            <span class="c1"># Navigate to Google Flights</span>
 <a id="__codelineno-0-334" name="__codelineno-0-334"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="s2">&quot;https://www.google.com/travel/flights&quot;</span><span class="p">)</span>
@@ -1605,16 +1604,15 @@
 <a id="__codelineno-0-370" name="__codelineno-0-370"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 <a id="__codelineno-0-371" name="__codelineno-0-371"></a>            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">:</span>
 <a id="__codelineno-0-372" name="__codelineno-0-372"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a>        <span class="c1"># Update status</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="c1"># Export</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="k">if</span> <span class="n">export_path</span><span class="p">:</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_export_data</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">export_path</span><span class="p">)</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>        <span class="k">return</span> <span class="n">result</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>        <span class="c1"># Update status</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>        <span class="n">result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>        <span class="c1"># Export</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>        <span class="k">if</span> <span class="n">export_path</span><span class="p">:</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_export_data</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">export_path</span><span class="p">)</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1913,8 +1911,7 @@
 <span class="normal"><a href="#__codelineno-0-378">378</a></span>
 <span class="normal"><a href="#__codelineno-0-379">379</a></span>
 <span class="normal"><a href="#__codelineno-0-380">380</a></span>
-<span class="normal"><a href="#__codelineno-0-381">381</a></span>
-<span class="normal"><a href="#__codelineno-0-382">382</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="k">def</span><span class="w"> </span><span class="nf">scrape_flight</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-381">381</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-280" name="__codelineno-0-280"></a><span class="k">def</span><span class="w"> </span><span class="nf">scrape_flight</span><span class="p">(</span>
 <a id="__codelineno-0-281" name="__codelineno-0-281"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-282" name="__codelineno-0-282"></a>    <span class="n">departure_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <a id="__codelineno-0-283" name="__codelineno-0-283"></a>    <span class="n">departure_country</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1965,7 +1962,7 @@
 <a id="__codelineno-0-328" name="__codelineno-0-328"></a>        <span class="p">)</span>
 <a id="__codelineno-0-329" name="__codelineno-0-329"></a>
 <a id="__codelineno-0-330" name="__codelineno-0-330"></a>        <span class="c1"># Setup browser</span>
-<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">=</span> <span class="n">setup_browser</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">page</span> <span class="o">=</span> <span class="n">setup_browser</span><span class="p">(</span><span class="n">headless</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <a id="__codelineno-0-332" name="__codelineno-0-332"></a>
 <a id="__codelineno-0-333" name="__codelineno-0-333"></a>        <span class="c1"># Navigate to Google Flights</span>
 <a id="__codelineno-0-334" name="__codelineno-0-334"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">page</span><span class="o">.</span><span class="n">goto</span><span class="p">(</span><span class="s2">&quot;https://www.google.com/travel/flights&quot;</span><span class="p">)</span>
@@ -2007,16 +2004,15 @@
 <a id="__codelineno-0-370" name="__codelineno-0-370"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">browser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 <a id="__codelineno-0-371" name="__codelineno-0-371"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="p">:</span>
 <a id="__codelineno-0-372" name="__codelineno-0-372"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">playwright</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a>        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="c1"># Update status</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a>    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>    <span class="c1"># Export</span>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="k">if</span> <span class="n">export_path</span><span class="p">:</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_export_data</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">export_path</span><span class="p">)</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">return</span> <span class="n">result</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>    <span class="c1"># Update status</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="n">result</span><span class="p">[</span><span class="s2">&quot;status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">status</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a>    <span class="c1"># Export</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>    <span class="k">if</span> <span class="n">export_path</span><span class="p">:</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_export_data</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">export_path</span><span class="p">)</span>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="k">return</span> <span class="n">result</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
