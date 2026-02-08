@@ -202,7 +202,7 @@ class GoogleFlightsScraper:
         """
         for attempt in range(max_retries):
             try:
-                flight = find_and_select_best_flight(self._page, timeout=DEFAULT_TIMEOUT)
+                flight = find_and_select_best_flight(self._page, timeout=self.wait_time)
 
                 if flight is None:
                     return f"No {key.replace('_', ' ')} found."
@@ -328,7 +328,7 @@ class GoogleFlightsScraper:
             )
 
             # Setup browser
-            self.playwright, self.browser, self.context, self.page = setup_browser(headless=False)
+            self.playwright, self.browser, self.context, self.page = setup_browser(headless=True)
 
             # Navigate to Google Flights
             self.page.goto("https://www.google.com/travel/flights")
@@ -370,7 +370,6 @@ class GoogleFlightsScraper:
                 self.browser.close()
             if self.playwright:
                 self.playwright.stop()
-            time.sleep(1)
 
         # Update status
         result["status"] = status
