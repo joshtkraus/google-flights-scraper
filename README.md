@@ -5,7 +5,7 @@
 
 # Google Flights Web Scraper
 
-A Python-based end-to-end web scraping of Google Flights using Selenium selecting the "best" flight options, and collecting flight information including prices, times, airlines, connections, and price relativity.
+A Python-based end-to-end web scraping of Google Flights using Playwright selecting the "best" flight options, and collecting flight information including prices, times, airlines, connections, and price relativity.
 
 ## Use Cases
 - Single Search: Enter a departure and arrival destination along with departure and return dates, recieve information for the flight options that Google Flights deems are "best".

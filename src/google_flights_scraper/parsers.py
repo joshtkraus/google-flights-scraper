@@ -1,16 +1,13 @@
 """Data extraction and parsing functions for Google Flights scraper."""
 
 import re
+import sys
 import time
 
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver import Chrome
-from selenium.webdriver.common.by import By
-from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.wait import WebDriverWait
+from playwright.sync_api import Locator, Page
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-from .interactions import wait_until_class_stable
+from .interactions import wait_until_stable
 
 
 def create_empty_flight_info():
@@ -166,7 +163,7 @@ def extract_duration(flight_description: str):
     if m := re.search(r"Total duration (\d+) min", flight_description):
         minutes = int(m.group(1))
         duration_minutes = minutes
-        duration_str = f"{minutes} hr"
+        duration_str = f"{minutes} min"
         return duration_minutes, duration_str
 
     return None, None
@@ -193,126 +190,121 @@ def extract_baggage_info(flight_description: str):
     return carry_on_bags, checked_bags
 
 
-def extract_flight_details(flight_element: WebElement):
+def extract_flight_details(flight_element: Locator):
     """Extract all flight details from a flight element.
 
     Args:
-        flight_element (WebElement): Selenium WebElement containing flight info
+        flight_element (Locator): Playwright Locator containing flight info
 
     Returns:
-        tuple: (flight_info dict, price)
+        dict: flight_info dictionary
     """
     # Initialize flight info structure
     flight_info = create_empty_flight_info()
 
     # Get flight description immediately and store as string
-    # Using relative XPath to search within the element
-    flight_description = flight_element.find_element(
-        By.XPATH,
-        ".//div[starts-with(@aria-label, 'From ')]",
-    ).get_attribute("aria-label")
+    flight_desc_locator = flight_element.locator("div[aria-label^='From ']")
+
+    try:
+        flight_description = flight_desc_locator.get_attribute("aria-label")
+    except Exception:
+        return flight_info
 
     if flight_description is None:
         return flight_info
-    else:
-        # Clean the string
-        flight_description = flight_description.replace("\u202f", " ").replace("\xa0", " ")
 
-        # Extract all information using helper functions
-        flight_info["airline"] = extract_airline(flight_description)
+    # Clean the string
+    flight_description = flight_description.replace("\u202f", " ").replace("\xa0", " ")
 
-        (
-            flight_info["departure_airport"],
-            flight_info["departure_time"],
-            flight_info["departure_date"],
-        ) = extract_departure_info(flight_description)
+    # Extract all information using helper functions
+    flight_info["airline"] = extract_airline(flight_description)
 
-        flight_info["arrival_airport"], flight_info["arrival_time"], flight_info["arrival_date"] = (
-            extract_arrival_info(flight_description)
-        )
+    (
+        flight_info["departure_airport"],
+        flight_info["departure_time"],
+        flight_info["departure_date"],
+    ) = extract_departure_info(flight_description)
 
-        flight_info["num_stops"] = extract_num_stops(flight_description)
+    flight_info["arrival_airport"], flight_info["arrival_time"], flight_info["arrival_date"] = (
+        extract_arrival_info(flight_description)
+    )
 
-        flight_info["connection_airports"], flight_info["layover_durations"] = extract_layover_info(
-            flight_description
-        )
+    flight_info["num_stops"] = extract_num_stops(flight_description)
 
-        flight_info["duration_minutes"], flight_info["duration_str"] = extract_duration(
-            flight_description
-        )
+    flight_info["connection_airports"], flight_info["layover_durations"] = extract_layover_info(
+        flight_description
+    )
 
-        flight_info["carry_on_bags"], flight_info["checked_bags"] = extract_baggage_info(
-            flight_description
-        )
+    flight_info["duration_minutes"], flight_info["duration_str"] = extract_duration(
+        flight_description
+    )
 
+    flight_info["carry_on_bags"], flight_info["checked_bags"] = extract_baggage_info(
+        flight_description
+    )
     return flight_info
 
 
 def _extract_attribute_with_retry(
-    wait: WebDriverWait,
-    xpath: str,
+    page: Page,
+    selector: str,
     attribute: str,
     max_retries: int = 3,
     sleep_s: float = 0.5,
 ):
-    """Extract attribute from element with retry for stale element handling.
+    """Extract attribute from element with retry for handling dynamic content.
 
     Args:
-        wait (WebDriverWait): WebDriverWait instance
-        xpath (str): XPath to locate element
+        page (Page): Playwright Page instance
+        selector (str): CSS selector to locate element
         attribute (str): Attribute name to extract
         max_retries (int): Number of retry attempts
         sleep_s (float): Sleep duration between retries
 
     Returns:
-        str | None: Attribute value, or None if not found/stale after retries
+        str | None: Attribute value, or None if not found after retries
     """
-    from selenium.common.exceptions import StaleElementReferenceException
-
     for attempt in range(max_retries):
         try:
-            element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-            # Extract attribute immediately to avoid stale element
-            return element.get_attribute(attribute)
+            element = page.locator(selector)
+            return element.first.get_attribute(attribute)
 
-        except StaleElementReferenceException:
+        except PlaywrightTimeoutError:
             if attempt == max_retries - 1:
-                print(f"Stale element after {max_retries} retries")
                 return None
             time.sleep(sleep_s)
-
-        except TimeoutException:
-            return None
+        except Exception as e:
+            if attempt == max_retries - 1:
+                print(f"Error extracting attribute: {e}", file=sys.stderr)
+                return None
+            time.sleep(sleep_s)
 
     return None
 
 
-def extract_final_price(wait: WebDriverWait, driver: Chrome, timeout: int):
+def extract_final_price(page: Page, timeout: int):
     """Extract the final price from the booking page.
 
     Args:
-        wait (WebDriverWait): WebDriverWait instance
-        driver (Chrome): Selenium WebDriver instance
+        page (Page): Playwright Page instance
         timeout (int): Timeout for waiting operations
 
     Returns:
         int: Final price in US dollars, or None if not found
     """
     # Wait for page to fully load
-    wait_until_class_stable(
-        driver,
-        (By.XPATH, "//div[@role='progressbar']"),
+    wait_until_stable(
+        page,
+        "div[role='progressbar']",
         stable_duration=2.0,
         timeout=timeout,
     )
 
     # Target the specific price element near "Lowest total price" text
-    price_xpath = (
-        "//div[contains(text(), 'Lowest total price')]/preceding-sibling::div//span[@aria-label]"
-    )
+    selector = "div:has-text('Lowest total price') + div span[aria-label*='US dollars']"
 
     # Get aria-label with retry
-    aria_label = _extract_attribute_with_retry(wait, price_xpath, "aria-label")
+    aria_label = _extract_attribute_with_retry(page, selector, "aria-label")
 
     # Check if aria_label is not None before regex
     if aria_label and (m := re.search(r"(\d+(?:,\d{3})*) US dollars", aria_label)):
@@ -322,74 +314,65 @@ def extract_final_price(wait: WebDriverWait, driver: Chrome, timeout: int):
 
 
 def _extract_text_with_retry(
-    wait: WebDriverWait,
-    xpath: str,
+    page: Page,
+    selector: str,
     max_retries: int = 3,
     sleep_s: float = 0.5,
 ):
-    """Extract text from element with retry for stale element handling.
+    """Extract text from element with retry for handling dynamic content.
 
     Args:
-        wait (WebDriverWait): WebDriverWait instance
-        xpath (str): XPath to locate element
+        page (Page): Playwright Page instance
+        selector (str): CSS selector to locate element
         max_retries (int): Number of retry attempts
         sleep_s (float): Sleep duration between retries
 
     Returns:
-        str | None: Element text, or None if not found/stale after retries
+        str | None: Element text, or None if not found after retries
     """
-    from selenium.common.exceptions import StaleElementReferenceException
-
     for attempt in range(max_retries):
         try:
-            element = wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
-            # Extract text immediately to avoid stale element
-            return element.text
+            element = page.locator(selector)
+            return element.first.inner_text()
 
-        except StaleElementReferenceException:
+        except PlaywrightTimeoutError:
             if attempt == max_retries - 1:
-                print(f"Stale element after {max_retries} retries")
                 return None
             time.sleep(sleep_s)
-
-        except TimeoutException:
-            return None
+        except Exception as e:
+            if attempt == max_retries - 1:
+                print(f"Error extracting text: {e}", file=sys.stderr)
+                return None
+            time.sleep(sleep_s)
 
     return None
 
 
-def extract_price_classification_text(wait: WebDriverWait, driver: Chrome, timeout: int):
+def extract_price_classification_text(page: Page, timeout: int):
     """Find and extract the price classification text from the page.
 
     Args:
-        wait (WebDriverWait): WebDriverWait instance
-        driver (Chrome): Selenium WebDriver instance
+        page (Page): Playwright Page instance
         timeout (int): Timeout for waiting operations
 
     Returns:
         str: Text containing price classification, or None if not found
     """
-    from .interactions import wait_until_class_stable
-
     # Wait for page to load
-    wait_until_class_stable(
-        driver,
-        (By.XPATH, "//div[@role='progressbar']"),
+    wait_until_stable(
+        page,
+        "div[role='progressbar']",
         stable_duration=2.0,
         timeout=timeout,
     )
 
-    # Look for div containing "low", "high", or "typical" in a span
-    price_xpath = (
-        "(//h3[contains(text(), 'Price insights')]"
-        "/ancestor::div[contains(@class, 'VfPpkd-WsjYwc')]"
-        "//div[contains(., ' is ') and contains(., ' for ') and "
-        ".//span[contains(text(), 'low') or "
-        "contains(text(), 'high') or "
-        "contains(text(), 'typical')]])[4]"
+    # Look for div containing "low", "high", or "typical" in Price insights section
+    selector = (
+        "h3:has-text('Price insights') ~ * "
+        "div:has-text(' is '):has-text(' for '):has(span:text-matches('low|high|typical', 'i'))"
     )
 
-    return _extract_text_with_retry(wait, price_xpath)
+    return _extract_text_with_retry(page, selector)
 
 
 def parse_price_classification(text: str):
@@ -431,7 +414,7 @@ def parse_price_difference(text: str):
     text_lower = text.lower()
 
     if "cheaper" in text_lower:
-        # Extract dollar amount: "$102 cheaper" -> 102
+        # Extract dollar amount
         if m := re.search(r"\$(\d+(?:,\d{3})*)\s+cheaper", text):
             return int(m.group(1).replace(",", ""))
         return 0
@@ -442,12 +425,11 @@ def parse_price_difference(text: str):
     return None
 
 
-def extract_price_relativity(wait: WebDriverWait, driver: Chrome, timeout: int):
+def extract_price_relativity(page: Page, timeout: int):
     """Extract price relativity information from final page.
 
     Args:
-        wait (WebDriverWait): WebDriverWait instance
-        driver (Chrome): Selenium WebDriver instance
+        page (Page): Playwright Page instance
         timeout (int): Timeout for waiting operations
 
     Returns:
@@ -455,7 +437,7 @@ def extract_price_relativity(wait: WebDriverWait, driver: Chrome, timeout: int):
                'typical', 'high', 'low', or None; amount is integer or None
     """
     # Extract the text from the page
-    text = extract_price_classification_text(wait, driver, timeout)
+    text = extract_price_classification_text(page, timeout)
 
     if not text:
         return None, None
