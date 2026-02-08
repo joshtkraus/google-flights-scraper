@@ -732,6 +732,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../reference/google_flights_scraper/jupyter_helper/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    jupyter_helper
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../reference/google_flights_scraper/parsers/" class="md-nav__link">
         
   
@@ -1639,7 +1667,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Import</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">google_flights_scraper</span><span class="w"> </span><span class="kn">import</span> <span class="n">GoogleFlightsScraper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">google_flights_scraper.jupyter_helper</span><span class="w"> </span><span class="kn">import</span> <span class="n">scrape_flight</span>
 
 <span class="c1"># Get today's date</span>
 <span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
@@ -1647,7 +1675,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="clipboard-copy-txt" id="cell-2"># Import
 from datetime import datetime, timedelta
 
-from google_flights_scraper import GoogleFlightsScraper
+from google_flights_scraper.jupyter_helper import scrape_flight
 
 # Get today's date
 today = datetime.today()</div>
@@ -1797,15 +1825,12 @@ today = datetime.today()</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Initialize</span>
-<span class="n">scraper</span> <span class="o">=</span> <span class="n">GoogleFlightsScraper</span><span class="p">()</span>
-
-<span class="c1"># Create Dates</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create Dates</span>
 <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
 <span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
 
 <span class="c1"># Run</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">scrape_flight</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">scrape_flight</span><span class="p">(</span>
     <span class="n">departure_code</span><span class="o">=</span><span class="s2">"LAX"</span><span class="p">,</span>
     <span class="n">departure_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
     <span class="n">arrival_code</span><span class="o">=</span><span class="s2">"New York"</span><span class="p">,</span>
@@ -1815,15 +1840,12 @@ today = datetime.today()</div>
     <span class="n">seat_class</span><span class="o">=</span><span class="s2">"Economy (include Basic)"</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3"># Initialize
-scraper = GoogleFlightsScraper()
-
-# Create Dates
+<div class="clipboard-copy-txt" id="cell-3"># Create Dates
 start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
 end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 # Run
-result = scraper.scrape_flight(
+result = scrape_flight(
     departure_code="LAX",
     departure_country="United States of America",
     arrival_code="New York",
@@ -1874,43 +1896,43 @@ result = scraper.scrape_flight(
   'departure_country': 'United States of America',
   'arrival_airport': 'New York',
   'arrival_country': 'United States of America',
-  'departure_date': '03/06/2026',
-  'return_date': '03/13/2026',
+  'departure_date': '03/08/2026',
+  'return_date': '03/15/2026',
   'seat_class': 'Economy (include Basic)'},
  'departure_flight': {'airline': 'Spirit',
   'departure_airport': 'Los Angeles International Airport',
-  'departure_date': 'Friday, March 6',
+  'departure_date': 'Sunday, March 8',
   'departure_time': '8:20 AM',
   'num_stops': 0,
   'connection_airports': [],
   'layover_durations': [],
   'arrival_airport': 'Newark Liberty International Airport',
-  'arrival_date': 'Friday, March 6',
+  'arrival_date': 'Sunday, March 8',
   'arrival_time': '4:35 PM',
   'duration_minutes': 315,
   'duration_str': '5 hr 15 min',
-  'carry_on_bags': 0,
-  'checked_bags': 0},
- 'return_flight': {'airline': 'Spirit',
+  'carry_on_bags': None,
+  'checked_bags': None},
+ 'return_flight': {'airline': 'United',
   'departure_airport': 'Newark Liberty International Airport',
-  'departure_date': 'Friday, March 13',
-  'departure_time': '6:59 PM',
+  'departure_date': 'Sunday, March 15',
+  'departure_time': '6:00 AM',
   'num_stops': 0,
   'connection_airports': [],
   'layover_durations': [],
   'arrival_airport': 'Los Angeles International Airport',
-  'arrival_date': 'Friday, March 13',
-  'arrival_time': '10:14 PM',
-  'duration_minutes': 375,
-  'duration_str': '6 hr 15 min',
-  'carry_on_bags': 0,
-  'checked_bags': 0},
- 'price': 189,
+  'arrival_date': 'Sunday, March 15',
+  'arrival_time': '9:25 AM',
+  'duration_minutes': 385,
+  'duration_str': '6 hr 25 min',
+  'carry_on_bags': None,
+  'checked_bags': None},
+ 'price': 275,
  'price_classification': 'low',
- 'price_difference': 87,
- 'price_relativity': 0.3152,
+ 'price_difference': 132,
+ 'price_relativity': 0.3243,
  'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpGEgoyMDI2LTAzLTA2IiAKA0xBWBIKMjAyNi0wMy0wNhoDRVdSKgJOSzIEMTY5M2oHCAESA0xBWHINCAMSCS9tLzAyXzI4NhpGEgoyMDI2LTAzLTEzIiAKA0VXUhIKMjAyNi0wMy0xMxoDTEFYKgJOSzIEMTY3MGoNCAMSCS9tLzAyXzI4NnIHCAESA0xBWEABSAFwAYIBCwj___________8BmAEB&amp;tfu=CmxDalJJZFd0Q2R6ZHFNMUJRTlVGQlJHVnRiMmRDUnkwdExTMHRMUzB0TFhaM2VXMHhNRUZCUVVGQlIyMUhTMnRyVFU1bk5rTkJFZ1pPU3pFMk56QWFDd2lDa3dFUUFob0RWVk5FT0J4d2dwTUISAggAIgMKATE'}</pre>
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpGEgoyMDI2LTAzLTA4IiAKA0xBWBIKMjAyNi0wMy0wOBoDRVdSKgJOSzIEMTY5M2oHCAESA0xBWHINCAMSCS9tLzAyXzI4NhpGEgoyMDI2LTAzLTE1IiAKA0VXUhIKMjAyNi0wMy0xNRoDTEFYKgJVQTIEMjQzNGoNCAMSCS9tLzAyXzI4NnIHCAESA0xBWEABSAFwAYIBCwj___________8BmAEB&amp;tfu=CmxDalJJWW0xNU1rWXpUblUyYjNOQlNGOUpTVkZDUnkwdExTMHRMUzB0TFhaMGVXTXhPVUZCUVVGQlIyMUplbEJ2UlY5U2VIVkJFZ1pWUVRJME16UWFDd2pzMWdFUUFob0RWVk5FT0J4dzdOWUISAggAIgA'}</pre>
 </div>
 </div>
 </div>
@@ -1924,7 +1946,7 @@ result = scraper.scrape_flight(
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <p>This returns a Nonstop flight on Spirit landing at Newark Liberty International Airport. Google Flights tends to prioritize the cheapest flight as the "best" flight, but sometimes will choose more expensive flights if they offer significantly better travel (usually less layover time).</p>
-<p>This price is classified as <code>"low"</code> and <code>"price_difference"</code> of $87 is returned (<code>"price_relativity"</code> = 31.52% discount).</p>
+<p>This price is classified as <code>"low"</code> and <code>"price_difference"</code> of $132 is returned (<code>"price_relativity"</code> = 32.43% discount).</p>
 </div>
 </div>
 </div>
@@ -1939,8 +1961,8 @@ result = scraper.scrape_flight(
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=9eaed783">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=9eaed783">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -1958,15 +1980,12 @@ result = scraper.scrape_flight(
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Initialize</span>
-<span class="n">scraper</span> <span class="o">=</span> <span class="n">GoogleFlightsScraper</span><span class="p">()</span>
-
-<span class="c1"># Create Dates</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create Dates</span>
 <span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">8</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
 <span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
 
 <span class="c1"># Run</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">scrape_flight</span><span class="p">(</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">scrape_flight</span><span class="p">(</span>
     <span class="n">departure_code</span><span class="o">=</span><span class="s2">"New York"</span><span class="p">,</span>
     <span class="n">departure_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
     <span class="n">arrival_code</span><span class="o">=</span><span class="s2">"Tokyo"</span><span class="p">,</span>
@@ -1975,17 +1994,13 @@ result = scraper.scrape_flight(
     <span class="n">end_date</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
     <span class="n">seat_class</span><span class="o">=</span><span class="s2">"Premium economy"</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">result</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-5"># Initialize
-scraper = GoogleFlightsScraper()
-
-# Create Dates
+<div class="clipboard-copy-txt" id="cell-5"># Create Dates
 start = (today + timedelta(weeks=8)).strftime("%m/%d/%Y")
 end = (today + timedelta(weeks=10)).strftime("%m/%d/%Y")
 
 # Run
-result = scraper.scrape_flight(
+result = scrape_flight(
     departure_code="New York",
     departure_country="United States of America",
     arrival_code="Tokyo",
@@ -1993,91 +2008,14 @@ result = scraper.scrape_flight(
     start_date=start,
     end_date=end,
     seat_class="Premium economy",
-)
-result</div>
+)</div>
 </div>
 </div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>{'inputs': {'departure_airport': 'New York',
-  'departure_country': 'United States of America',
-  'arrival_airport': 'Tokyo',
-  'arrival_country': 'Japan',
-  'departure_date': '04/03/2026',
-  'return_date': '04/17/2026',
-  'seat_class': 'Premium economy'},
- 'departure_flight': {'airline': 'United',
-  'departure_airport': 'Newark Liberty International Airport',
-  'departure_date': 'Friday, April 3',
-  'departure_time': '11:25 AM',
-  'num_stops': 0,
-  'connection_airports': [],
-  'layover_durations': [],
-  'arrival_airport': 'Narita International Airport',
-  'arrival_date': 'Saturday, April 4',
-  'arrival_time': '2:30 PM',
-  'duration_minutes': 845,
-  'duration_str': '14 hr 5 min',
-  'carry_on_bags': None,
-  'checked_bags': None},
- 'return_flight': {'airline': 'United',
-  'departure_airport': 'Narita International Airport',
-  'departure_date': 'Friday, April 17',
-  'departure_time': '5:25 PM',
-  'num_stops': 0,
-  'connection_airports': [],
-  'layover_durations': [],
-  'arrival_airport': 'Newark Liberty International Airport',
-  'arrival_date': 'Friday, April 17',
-  'arrival_time': '5:10 PM',
-  'duration_minutes': 765,
-  'duration_str': '12 hr 45 min',
-  'carry_on_bags': None,
-  'checked_bags': None},
- 'price': 3393,
- 'price_classification': None,
- 'price_difference': None,
- 'price_relativity': None,
- 'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpJEgoyMDI2LTA0LTAzIh4KA0VXUhIKMjAyNi0wNC0wMxoDTlJUKgJVQTICNzlqDQgDEgkvbS8wMl8yODZyDAgDEggvbS8wN2RmaxpJEgoyMDI2LTA0LTE3Ih4KA05SVBIKMjAyNi0wNC0xNxoDRVdSKgJVQTICNzhqDAgDEggvbS8wN2Rma3INCAMSCS9tLzAyXzI4NkABSAJwAYIBCwj___________8BmAEB&amp;tfu=CmxDalJJYWtNNU9GTkdXblUyVWxsQlJGUnFkMUZDUnkwdExTMHRMUzEyZDI0eU9DMXVNa0ZCUVVGQlIyMUhTMnd3VEdOV1FrMUJFZ1JWUVRjNEdnc0l5ZG9VRUFJYUExVlRSRGdjY01uYUZBPT0SAggAIgYKATAKATE'}</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=39b33c50">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This returns a nonstop flight on United.</p>
-<p>The <code>'price_classification'</code> and <code>'price_difference'</code> here are <code>None</code>. I've found that Google Flights offers these suggestions less for non-Economy flights.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=59453d65">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="example-3-domestic-economy-excluding-basic">Example 3: Domestic Economy (excluding Basic)<a class="anchor-link" href="#example-3-domestic-economy-excluding-basic">¶</a></h2><p>Below is an example request for a Domestic Economy (excluding Basic) flight leaving from SFO and arriving at DCA.</p>
-<p>Economy (excluding Basic) excludes budget airlines like Frontier, Spirit, and Breeze from its listings.</p>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b58723b7">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a1a50adb">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2095,43 +2033,9 @@ result</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Initialize</span>
-<span class="n">scraper</span> <span class="o">=</span> <span class="n">GoogleFlightsScraper</span><span class="p">()</span>
-
-<span class="c1"># Create Dates</span>
-<span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
-<span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">7</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
-
-<span class="c1"># Run</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">scraper</span><span class="o">.</span><span class="n">scrape_flight</span><span class="p">(</span>
-    <span class="n">departure_code</span><span class="o">=</span><span class="s2">"SFO"</span><span class="p">,</span>
-    <span class="n">departure_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
-    <span class="n">arrival_code</span><span class="o">=</span><span class="s2">"DCA"</span><span class="p">,</span>
-    <span class="n">arrival_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
-    <span class="n">start_date</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
-    <span class="n">end_date</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
-    <span class="n">seat_class</span><span class="o">=</span><span class="s2">"Economy (exclude Basic)"</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">result</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">result</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-6"># Initialize
-scraper = GoogleFlightsScraper()
-
-# Create Dates
-start = (today + timedelta(weeks=6)).strftime("%m/%d/%Y")
-end = (today + timedelta(weeks=7)).strftime("%m/%d/%Y")
-
-# Run
-result = scraper.scrape_flight(
-    departure_code="SFO",
-    departure_country="United States of America",
-    arrival_code="DCA",
-    arrival_country="United States of America",
-    start_date=start,
-    end_date=end,
-    seat_class="Economy (exclude Basic)",
-)
-result</div>
+<div class="clipboard-copy-txt" id="cell-6">result</div>
 </div>
 </div>
 </div>
@@ -2143,47 +2047,203 @@ result</div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
+<pre>{'inputs': {'departure_airport': 'New York',
+  'departure_country': 'United States of America',
+  'arrival_airport': 'Tokyo',
+  'arrival_country': 'Japan',
+  'departure_date': '04/05/2026',
+  'return_date': '04/19/2026',
+  'seat_class': 'Premium economy'},
+ 'departure_flight': {'airline': 'Air Canada',
+  'departure_airport': 'Newark Liberty International Airport',
+  'departure_date': 'Sunday, April 5',
+  'departure_time': '6:40 PM',
+  'num_stops': 1,
+  'connection_airports': ['Montréal-Pierre Elliott Trudeau International Airport'],
+  'layover_durations': ['16 hr 50 min'],
+  'arrival_airport': 'Narita International Airport',
+  'arrival_date': 'Tuesday, April 7',
+  'arrival_time': '3:25 PM',
+  'duration_minutes': 1905,
+  'duration_str': '31 hr 45 min',
+  'carry_on_bags': None,
+  'checked_bags': None},
+ 'return_flight': {'airline': 'Air Canada',
+  'departure_airport': 'Narita International Airport',
+  'departure_date': 'Sunday, April 19',
+  'departure_time': '5:40 PM',
+  'num_stops': 1,
+  'connection_airports': ['Montréal-Pierre Elliott Trudeau International Airport'],
+  'layover_durations': ['20 hr 10 min'],
+  'arrival_airport': 'Newark Liberty International Airport',
+  'arrival_date': 'Monday, April 20',
+  'arrival_time': '2:59 PM',
+  'duration_minutes': 2059,
+  'duration_str': '34 hr 19 min',
+  'carry_on_bags': None,
+  'checked_bags': None},
+ 'price': 1856,
+ 'price_classification': None,
+ 'price_difference': None,
+ 'price_relativity': None,
+ 'status': 'Ran successfully.',
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpqEgoyMDI2LTA0LTA1IiAKA0VXUhIKMjAyNi0wNC0wNRoDWVVMKgJBQzIEODQ5OSIdCgNZVUwSCjIwMjYtMDQtMDYaA05SVCoCQUMyATVqDQgDEgkvbS8wMl8yODZyDAgDEggvbS8wN2RmaxpqEgoyMDI2LTA0LTE5Ih0KA05SVBIKMjAyNi0wNC0xORoDWVVMKgJBQzIBNiIgCgNZVUwSCjIwMjYtMDQtMjAaA0VXUioCQUMyBDE1NTZqDAgDEggvbS8wN2Rma3INCAMSCS9tLzAyXzI4NkABSAJwAYIBCwj___________8BmAEB&amp;tfu=CnRDalJJZUhFMGNqWnJOVkF3VWxWQlNYRlFZMEZDUnkwdExTMHRMUzB0TFMxMmQzbGpORUZCUVVGQlIyMUplbEpCVEdsalVWRkJFZ3BCUXpaOFFVTXhOVFUyR2dzSTBha0xFQUlhQTFWVFJEZ2NjTkdwQ3c9PRICCAAiAxIBMA'}</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=39b33c50">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>This returns a flight on Air Canada with one layover. You can see the layover details (airport, duration) are included.</p>
+<p>The <code>'price_classification'</code> and <code>'price_difference'</code> here are <code>None</code>. I've found that Google Flights offers these suggestions less for non-Economy flights.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=59453d65">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="example-3-domestic-economy-excluding-basic">Example 3: Domestic Economy (excluding Basic)<a class="anchor-link" href="#example-3-domestic-economy-excluding-basic">¶</a></h2><p>Below is an example request for a Domestic Economy (excluding Basic) flight leaving from SFO and arriving at DCA.</p>
+<p>Economy (excluding Basic) excludes budget airlines like Frontier, Spirit, and Breeze from its listings.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=b58723b7">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create Dates</span>
+<span class="n">start</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">6</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="n">today</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">weeks</span><span class="o">=</span><span class="mi">7</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%m/</span><span class="si">%d</span><span class="s2">/%Y"</span><span class="p">)</span>
+
+<span class="c1"># Run</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">scrape_flight</span><span class="p">(</span>
+    <span class="n">departure_code</span><span class="o">=</span><span class="s2">"SFO"</span><span class="p">,</span>
+    <span class="n">departure_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
+    <span class="n">arrival_code</span><span class="o">=</span><span class="s2">"DCA"</span><span class="p">,</span>
+    <span class="n">arrival_country</span><span class="o">=</span><span class="s2">"United States of America"</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="o">=</span><span class="n">end</span><span class="p">,</span>
+    <span class="n">seat_class</span><span class="o">=</span><span class="s2">"Economy (exclude Basic)"</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7"># Create Dates
+start = (today + timedelta(weeks=6)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=7)).strftime("%m/%d/%Y")
+
+# Run
+result = scrape_flight(
+    departure_code="SFO",
+    departure_country="United States of America",
+    arrival_code="DCA",
+    arrival_country="United States of America",
+    start_date=start,
+    end_date=end,
+    seat_class="Economy (exclude Basic)",
+)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=7fc796f2">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy ,="" aria-label="Copy to Clipboard" for="cell-8">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">result</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-8">result</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>{'inputs': {'departure_airport': 'SFO',
   'departure_country': 'United States of America',
   'arrival_airport': 'DCA',
   'arrival_country': 'United States of America',
-  'departure_date': '03/20/2026',
-  'return_date': '03/27/2026',
+  'departure_date': '03/22/2026',
+  'return_date': '03/29/2026',
   'seat_class': 'Economy (exclude Basic)'},
- 'departure_flight': {'airline': 'Southwest',
+ 'departure_flight': {'airline': 'United',
   'departure_airport': 'San Francisco International Airport',
-  'departure_date': 'Friday, March 20',
-  'departure_time': '5:10 AM',
-  'num_stops': 1,
-  'connection_airports': ['Chicago Midway International Airport'],
-  'layover_durations': ['1 hr'],
+  'departure_date': 'Sunday, March 22',
+  'departure_time': '8:40 AM',
+  'num_stops': 0,
+  'connection_airports': [],
+  'layover_durations': [],
   'arrival_airport': 'Ronald Reagan Washington National Airport',
-  'arrival_date': 'Friday, March 20',
-  'arrival_time': '2:55 PM',
-  'duration_minutes': 405,
-  'duration_str': '6 hr 45 min',
+  'arrival_date': 'Sunday, March 22',
+  'arrival_time': '4:53 PM',
+  'duration_minutes': 313,
+  'duration_str': '5 hr 13 min',
   'carry_on_bags': 1,
   'checked_bags': 0},
- 'return_flight': {'airline': 'Southwest',
+ 'return_flight': {'airline': 'United',
   'departure_airport': 'Ronald Reagan Washington National Airport',
-  'departure_date': 'Friday, March 27',
-  'departure_time': '9:05 AM',
-  'num_stops': 1,
-  'connection_airports': ['Nashville International Airport'],
-  'layover_durations': ['2 hr 10 min'],
+  'departure_date': 'Sunday, March 29',
+  'departure_time': '7:30 AM',
+  'num_stops': 0,
+  'connection_airports': [],
+  'layover_durations': [],
   'arrival_airport': 'San Francisco International Airport',
-  'arrival_date': 'Friday, March 27',
-  'arrival_time': '3:25 PM',
-  'duration_minutes': 560,
-  'duration_str': '9 hr 20 min',
+  'arrival_date': 'Sunday, March 29',
+  'arrival_time': '10:42 AM',
+  'duration_minutes': 372,
+  'duration_str': '6 hr 12 min',
   'carry_on_bags': 1,
   'checked_bags': 0},
- 'price': 708,
+ 'price': 1079,
  'price_classification': 'typical',
  'price_difference': 0,
  'price_relativity': 0.0,
  'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhphEgoyMDI2LTAzLTIwIiAKA1NGTxIKMjAyNi0wMy0yMBoDTURXKgJXTjIEMzkzOCIfCgNNRFcSCjIwMjYtMDMtMjAaA0RDQSoCV04yAzE2NGoHCAESA1NGT3IHCAESA0RDQRpgEgoyMDI2LTAzLTI3Ih8KA0RDQRIKMjAyNi0wMy0yNxoDQk5BKgJXTjIDOTY1Ih8KA0JOQRIKMjAyNi0wMy0yNxoDU0ZPKgJXTjIDNjc4agcIARIDRENBcgcIARIDU0ZPQAFIAXABggELCP___________wGYAQHIAQE&amp;tfu=CnRDalJJVkY5R2QxRndNRTFpTkc5QlJHUm1ORUZDUnkwdExTMHRMUzB0TFhaMGJXNHhPVUZCUVVGQlIyMUhTMjV2UzBkbWFrdEJFZ3RYVGprMk5YeFhUalkzT0JvTENOV29CQkFDR2dOVlUwUTRISERWcUFRPRICCAAiAA'}</pre>
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpAEgoyMDI2LTAzLTIyIiAKA1NGTxIKMjAyNi0wMy0yMhoDRENBKgJVQTIEMTY3OGoHCAESA1NGT3IHCAESA0RDQRo_EgoyMDI2LTAzLTI5Ih8KA0RDQRIKMjAyNi0wMy0yORoDU0ZPKgJVQTIDMzY5agcIARIDRENBcgcIARIDU0ZPQAFIAXABggELCP___________wGYAQHIAQE&amp;tfu=CnBDalJJVW1kZlRsQmhWMjlFVldOQlNTMVBSWGRDUnkwdExTMHRMUzB0TFhsc2IyWXhOa0ZCUVVGQlIyMUplbFZOVGtoaVkzbEJFZ2RWUVRNMk9TTXhHZ3NJMnNvR0VBSWFBMVZUUkRnY2NOcktCZz09EgIIACIDCgEx'}</pre>
 </div>
 </div>
 </div>
@@ -2196,8 +2256,8 @@ result</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>This returns a flight on Southwest with one layover. You can see the layover details listed, include location and duration.</p>
-<p>The <code>'price_classification'</code> is 'typucal' so a <code>'price_difference'</code> of $0 is returned.</p>
+<p>This returns a nonstop flight on United.</p>
+<p>The <code>'price_classification'</code> is 'typical' so a <code>'price_difference'</code> of $0 is returned.</p>
 </div>
 </div>
 </div>
