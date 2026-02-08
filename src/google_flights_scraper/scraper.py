@@ -1,14 +1,14 @@
 """Main scraper orchestration class."""
 
 import json
+import sys
 import time
 from pathlib import Path
 
 import pandas as pd
-from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver.support.wait import WebDriverWait
+from playwright.sync_api import Page
 
-from .config_browser import DEFAULT_WAIT_TIME, setup_chrome_driver
+from .config_browser import DEFAULT_TIMEOUT, setup_browser
 from .interactions import (
     enter_airports,
     enter_dates,
@@ -32,16 +32,32 @@ from .validators import (
 
 
 class GoogleFlightsScraper:
-    """Web scraper for Google Flights."""
+    """Web scraper for Google Flights using Playwright."""
 
     def __init__(self):
         """Initialize the scraper with airport codes data."""
         package_dir = Path(__file__).parent.parent.parent
         csv_path = package_dir / "data" / "airport_codes.csv"
         self.airport_codes_df = pd.read_csv(csv_path)
-        self.driver = setup_chrome_driver(headless=True)
-        self.wait_time = DEFAULT_WAIT_TIME
-        self.wait = WebDriverWait(self.driver, self.wait_time)
+
+        self.wait_time = DEFAULT_TIMEOUT
+
+        # Playwright instances
+        self.playwright = None
+        self.browser = None
+        self.context = None
+        self.page = None
+
+    @property
+    def _page(self) -> Page:
+        """Get page instance, raising error if not initialized.
+
+        Raises:
+            RuntimeError: If brower now initialized.
+        """
+        if self.page is None:
+            raise RuntimeError("Browser not initialized. Call scrape_flight first.")
+        return self.page
 
     def _create_result_structure(
         self,
@@ -56,7 +72,7 @@ class GoogleFlightsScraper:
         """Create the initial result structure for storing flight data.
 
         Args:
-            departure_code (str): IATA code or cirty for departure airport
+            departure_code (str): IATA code or city for departure airport
             departure_country (str): Country of departure airport or city
             arrival_code (str): IATA code or city for arrival airport
             arrival_country (str): Country of arrival airport or city
@@ -108,7 +124,7 @@ class GoogleFlightsScraper:
             seat_class (str): Seat class string
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
-            export_path (str | None): Path to export, required if export is True
+            export_path (str | None): Path to export file
 
         Returns:
             bool: True if flight is domestic US
@@ -155,16 +171,16 @@ class GoogleFlightsScraper:
             is_domestic_us (bool): Whether flight is domestic US
         """
         # Enter airports
-        enter_airports(self.wait, departure_code, arrival_code)
+        enter_airports(self._page, departure_code, arrival_code)
 
         # Enter dates
-        enter_dates(self.wait, start_date, end_date)
+        enter_dates(self._page, start_date, end_date)
 
         # Select seat class
-        select_seat_class(self.wait, seat_class, is_domestic_us)
+        select_seat_class(self._page, seat_class, is_domestic_us)
 
         # Click search button
-        press_search_button(self.wait)
+        press_search_button(self._page)
 
     def _find_flight_with_retry(
         self,
@@ -177,32 +193,32 @@ class GoogleFlightsScraper:
 
         Args:
             result (dict): Dictionary to populate with flight details
-            key (str): Dict key to add data to (departure or return flight)
+            key (str): Dict key to add data to (departure_flight or return_flight)
             max_retries (int): Number of times to retry selecting element
             sleep_s (float): How long to sleep (seconds) in between each try
 
         Returns:
-            WebElement | None
+            str | None: Error message if failed, None if successful
         """
         for attempt in range(max_retries):
             try:
-                flight = find_and_select_best_flight(
-                    self.wait,
-                    self.driver,
-                    self.wait_time,
-                )
+                flight = find_and_select_best_flight(self._page, timeout=DEFAULT_TIMEOUT)
 
                 if flight is None:
-                    return None, f"No {key} found."
+                    return f"No {key.replace('_', ' ')} found."
 
                 result[key] = extract_flight_details(flight)
+
+                # Click the flight
                 flight.click()
                 return None
 
-            except StaleElementReferenceException:
+            except Exception as e:
                 if attempt == max_retries - 1:
-                    return f"No {key} found."
+                    return f"Error finding {key}: {str(e)}"
                 time.sleep(sleep_s)
+
+        return f"Failed to find {key} after {max_retries} retries."
 
     def _select_best_flights(self, result: dict):
         """Select the best departure and return flights and extract details.
@@ -214,40 +230,34 @@ class GoogleFlightsScraper:
             tuple: (updated result dictionary, success status message)
         """
         # Select Departure
-        err = self._find_flight_with_retry(
-            result,
-            key="departure_flight",
-        )
+        err = self._find_flight_with_retry(result, key="departure_flight")
         if err:
             return result, err
 
         # Select Return
-        err = self._find_flight_with_retry(
-            result,
-            key="return_flight",
-        )
+        err = self._find_flight_with_retry(result, key="return_flight")
         if err:
             return result, err
 
         # Extract price from final booking page
-        result["price"] = extract_final_price(self.wait, self.driver, self.wait_time)
+        result["price"] = extract_final_price(self._page, timeout=self.wait_time)
 
         # Capture the final page URL
-        result["url"] = self.driver.current_url
+        result["url"] = self._page.url
 
         return result, "Ran successfully."
 
     def _calc_price_rel(self, price: int, price_difference: int | None):
-        """Calculate price relaticity (% discount).
+        """Calculate price relativity (% discount).
 
         Args:
             price (int): Final flight price
-            price_difference (int | None): If found, how much cheaper flight is than usual
+            price_difference (int | None): How much cheaper flight is than usual
 
         Returns:
-            float: Percentage discount
+            float | None: Percentage discount or None
         """
-        if price_difference is not None:
+        if price_difference is not None and price is not None:
             return round(float(price_difference / (price + price_difference)), 4)
         else:
             return None
@@ -288,7 +298,7 @@ class GoogleFlightsScraper:
             start_date (str): Departure date in MM/DD/YYYY format
             end_date (str): Return date in MM/DD/YYYY format
             seat_class (str): Seat class (e.g., "Economy (include Basic)", "Business", etc.)
-            export_path (str | None): Path to export, required if export is True
+            export_path (str | None): Path to export file (.json or .csv)
 
         Returns:
             dict: Complete flight information as dictionary
@@ -317,8 +327,11 @@ class GoogleFlightsScraper:
                 export_path,
             )
 
+            # Setup browser
+            self.playwright, self.browser, self.context, self.page = setup_browser(headless=False)
+
             # Navigate to Google Flights
-            self.driver.get("https://www.google.com/travel/flights")
+            self.page.goto("https://www.google.com/travel/flights")
 
             # Fill search form
             self._fill_search_form(
@@ -336,7 +349,7 @@ class GoogleFlightsScraper:
             # Extract price difference
             if status == "Ran successfully.":
                 (result["price_classification"], result["price_difference"]) = (
-                    extract_price_relativity(self.wait, self.driver, self.wait_time)
+                    extract_price_relativity(self.page, timeout=self.wait_time)
                 )
 
             # Calculate price relativity
@@ -345,11 +358,18 @@ class GoogleFlightsScraper:
             )
 
         except Exception as e:
-            print(f"Error scraping flight: {e}")
+            print(f"Error scraping flight: {e}", file=sys.stderr)
             status = f"Error: {str(e)}"
         finally:
-            # Close the driver
-            self.driver.quit()
+            # Close browser and cleanup
+            if self.page:
+                self.page.close()
+            if self.context:
+                self.context.close()
+            if self.browser:
+                self.browser.close()
+            if self.playwright:
+                self.playwright.stop()
             time.sleep(1)
 
         # Update status
