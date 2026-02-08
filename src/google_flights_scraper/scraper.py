@@ -328,7 +328,7 @@ class GoogleFlightsScraper:
             )
 
             # Setup browser
-            self.playwright, self.browser, self.context, self.page = setup_browser(headless=True)
+            self.playwright, self.browser, self.context, self.page = setup_browser(headless=False)
 
             # Navigate to Google Flights
             self.page.goto("https://www.google.com/travel/flights")
