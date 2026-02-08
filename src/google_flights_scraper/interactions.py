@@ -22,7 +22,7 @@ def enter_departure_airport(page: Page, airport_code: str):
         from_input = page.locator("input[aria-label='Where from?']")
         from_input.wait_for(state="visible")
         from_input.click()
-        time.sleep(0.5)
+        time.sleep(1)
 
         from_popup = page.locator("input[aria-label*='Where else?']").nth(1)
         from_popup.wait_for(state="visible")
@@ -85,7 +85,7 @@ def enter_departure_date(page: Page, date_from: str):
         departure_input = page.locator("input[aria-label='Departure']").first
         departure_input.wait_for(state="visible")
         departure_input.click()
-        time.sleep(0.5)
+        time.sleep(1)
 
         departure_popup = page.locator("input[aria-label='Departure']").nth(1)
         departure_popup.wait_for(state="visible")
@@ -217,6 +217,7 @@ def wait_until_stable(page: Page, selector: str, stable_duration: float = 2.0, t
                 if stable_since is not None:
                     # Class hasn't changed, check if stable long enough
                     if time.time() - stable_since >= stable_duration:
+                        time.sleep(1)
                         break
             else:
                 # Class changed, reset the timer
