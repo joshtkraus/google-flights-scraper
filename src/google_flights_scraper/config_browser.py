@@ -1,7 +1,6 @@
 """Configuration constants and browser setup for Google Flights scraper."""
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
 
 # Valid seat class options
 VALID_CLASSES_DOMESTIC_US = [
@@ -22,50 +21,49 @@ VALID_CLASSES_INTERNATIONAL = [
 # Seat class to option index mapping
 SEAT_CLASS_OPTION_MAPPING = {
     True: {  # Domestic US
-        "economy (include basic)": 3,
-        "economy (exclude basic)": 4,
-        "premium economy": 5,
-        "business": 6,
-        "first": 7,
+        "economy (include basic)": 0,
+        "economy (exclude basic)": 1,
+        "premium economy": 2,
+        "business": 3,
+        "first": 4,
     },
     False: {  # International
-        "economy": 3,
-        "premium economy": 4,
-        "business": 5,
-        "first": 6,
+        "economy": 0,
+        "premium economy": 1,
+        "business": 2,
+        "first": 3,
     },
 }
 
-# Default wait times
-DEFAULT_WAIT_TIME = 10
+# Default timeout (ms)
+DEFAULT_TIMEOUT = 10000  # 10 seconds
 
 
-def setup_chrome_driver(headless: bool = True):
-    """Setup Chrome driver with appropriate options.
+def setup_browser(headless: bool = True) -> tuple[Playwright, Browser, BrowserContext, Page]:
+    """Setup Playwright browser with appropriate options.
 
     Args:
-        headless (bool): Whether to run Chrome in headless mode
+        headless (bool): Whether to run browser in headless mode
 
     Returns:
-        webdriver.Chrome: Configured Chrome driver instance
+        tuple: (playwright instance, browser, context, page)
     """
-    chrome_options = Options()
-    if headless:
-        chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-    chrome_options.add_argument(
-        "--user-agent="
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/120.0.0.0 Safari/537.36",
+    playwright = sync_playwright().start()
+
+    browser = playwright.chromium.launch(
+        headless=headless,
+        args=[
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-blink-features=AutomationControlled",
+            "--disable-gpu",
+            "--start-maximized",
+        ],
     )
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--remote-debugging-port=9222")
-    chrome_options.add_argument("--disable-software-rasterizer")
 
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.maximize_window()
+    context = browser.new_context(no_viewport=True)
 
-    return driver
+    page = context.new_page()
+    page.set_default_timeout(DEFAULT_TIMEOUT)
+
+    return playwright, browser, context, page

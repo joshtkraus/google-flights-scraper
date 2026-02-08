@@ -9,9 +9,9 @@ authors = [
 
 requires-python = ">=3.11, <4.0"
 dependencies = [
-    "selenium>=4.15.0",
+    "nest-asyncio>=1.6.0",
     "pandas>=2.0.0",
-    "webdriver-manager>=4.0.0",
+    "playwright>=1.58.0",
 ]
 
 
@@ -29,6 +29,7 @@ dev = [
     "pre-commit>=4.5.1",
     "codecov-cli>=11.2.6",
     "python-dotenv>=1.2.1",
+    "pytest-playwright>=0.7.2",
 ]
 docs = [
     "dunamai>=1.25.0",

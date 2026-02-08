@@ -1,5 +1,6 @@
 """Batch scraping functions for Google Flights scraper."""
 
+import sys
 import time
 from datetime import datetime, timedelta
 
@@ -50,8 +51,6 @@ def scrape_multiple_destinations(
     for i, (arrival_code, arrival_country, seat_class) in enumerate(
         zip(arrival_codes, arrival_countries, seat_classes, strict=True), 1
     ):
-        print(f"[{i}/{total}] Searching {departure_code} → {arrival_code} ({seat_class})...")
-
         try:
             scraper = GoogleFlightsScraper()
             result = scraper.scrape_flight(
@@ -69,7 +68,7 @@ def scrape_multiple_destinations(
             results.append(flat_result)
 
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Error: {e}", file=sys.stderr)
             # Add a failed result
             results.append({
                 "departure_airport": departure_code,
@@ -97,8 +96,6 @@ def scrape_multiple_destinations(
     # Save to CSV
     if output_path:
         df.to_csv(output_path, index=False)
-    successful = df["status"].str.contains("success", case=False, na=False).sum()
-    print(f"Total searches: {total}, Successful: {successful}")
 
     return df
 
@@ -160,7 +157,6 @@ def scrape_date_range(
     total = len(date_combinations)
 
     for i, combo in enumerate(date_combinations, 1):
-        print(f"[{i}/{total}] Searching {combo['departure']} → {combo['return']}...")
         try:
             scraper = GoogleFlightsScraper()
             result = scraper.scrape_flight(
@@ -179,7 +175,7 @@ def scrape_date_range(
             results.append(flat_result)
 
         except Exception as e:
-            print(f"  Error: {e}")
+            print(f"  Error: {e}", file=sys.stderr)
             # Add a failed result
             results.append({
                 "departure_airport": departure_code,
@@ -208,8 +204,6 @@ def scrape_date_range(
     # Save to CSV
     if output_path:
         df.to_csv(output_path, index=False)
-    successful = df["status"].str.contains("success", case=False, na=False).sum()
-    print(f"Total searches: {total}, Successful: {successful}")
 
     return df
 
