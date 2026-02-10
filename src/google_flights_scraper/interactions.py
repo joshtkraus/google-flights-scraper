@@ -174,7 +174,9 @@ def press_search_button(page: Page):
         raise Exception("Error pressing search button:") from e
 
 
-def wait_until_stable(page: Page, selector: str, stable_duration: float = 2.0, timeout: int = 2):
+def wait_until_stable(
+    page: Page, selector: str, stable_duration: float = 2.0, timeout: int = 10000
+):
     """Wait until an element's class attribute stops changing.
 
     Args:
@@ -187,13 +189,14 @@ def wait_until_stable(page: Page, selector: str, stable_duration: float = 2.0, t
         TimeoutError: If element class does not stabilize within timeout
     """
     start_time = time.time()
+    timeout_seconds = timeout / 1000
     previous_class = None
     first_read = True
     stable_since = None
 
     while True:
-        if time.time() - start_time > timeout:
-            raise TimeoutError(f"Element class did not stabilize within {timeout} seconds")
+        if time.time() - start_time > timeout_seconds:
+            raise TimeoutError(f"Element class did not stabilize within {timeout_seconds} seconds")
 
         try:
             element = page.locator(selector).nth(0)

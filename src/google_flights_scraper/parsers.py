@@ -288,7 +288,7 @@ def extract_final_price(page: Page, timeout: int):
 
     Args:
         page (Page): Playwright Page instance
-        timeout (int): Timeout for waiting operations
+        timeout (int): Timeout for waiting operations (in milliseconds)
 
     Returns:
         int: Final price in US dollars, or None if not found
@@ -314,67 +314,29 @@ def extract_final_price(page: Page, timeout: int):
     return None
 
 
-def _extract_text_with_retry(
-    page: Page,
-    selector: str,
-    max_retries: int = 3,
-    sleep_s: float = 0.5,
-):
-    """Extract text from element with retry for handling dynamic content.
-
-    Args:
-        page (Page): Playwright Page instance
-        selector (str): CSS selector to locate element
-        max_retries (int): Number of retry attempts
-        sleep_s (float): Sleep duration between retries
-
-    Returns:
-        str | None: Element text, or None if not found after retries
-    """
-    for attempt in range(max_retries):
-        try:
-            element = page.locator(selector)
-            element.first.wait_for(state="attached", timeout=500)
-            return element.first.inner_text()
-
-        except PlaywrightTimeoutError:
-            if attempt == max_retries - 1:
-                return None
-            time.sleep(sleep_s)
-        except Exception as e:
-            if attempt == max_retries - 1:
-                print(f"Error extracting text: {e}", file=sys.stderr)
-                return None
-            time.sleep(sleep_s)
-
-    return None
-
-
 def extract_price_classification_text(page: Page, timeout: int):
     """Find and extract the price classification text from the page.
 
     Args:
         page (Page): Playwright Page instance
-        timeout (int): Timeout for waiting operations
+        timeout (int): Timeout for waiting operations (in milliseconds)
 
     Returns:
         str: Text containing price classification, or None if not found
     """
-    # Wait for page to load
-    wait_until_stable(
-        page,
-        "div[role='progressbar']",
-        stable_duration=2.0,
-        timeout=timeout,
-    )
-
-    # Look for div containing "low", "high", or "typical" in Price insights section
+    # Look for price classification text
     selector = (
         "h3:has-text('Price insights') ~ * "
         "div:has-text(' is '):has-text(' for '):has(span:text-matches('low|high|typical', 'i'))"
     )
 
-    return _extract_text_with_retry(page, selector)
+    try:
+        element = page.locator(selector).first
+        element.wait_for(state="visible", timeout=1000)
+        return element.inner_text()
+    except PlaywrightTimeoutError:
+        print(f"Price classification not found: {selector}", file=sys.stderr)
+        return None
 
 
 def parse_price_classification(text: str):

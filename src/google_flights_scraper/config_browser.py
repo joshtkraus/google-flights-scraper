@@ -39,14 +39,8 @@ SEAT_CLASS_OPTION_MAPPING = {
 DEFAULT_TIMEOUT = 10000  # 10 seconds
 
 
-def setup_browser(
-    headless: bool = True, block_resources: bool = True
-) -> tuple[Playwright, Browser, BrowserContext, Page]:
+def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
     """Setup Playwright browser with appropriate options.
-
-    Args:
-        headless (bool): Whether to run browser in headless mode
-        block_resources (bool): Whether to block unnecessary resources
 
     Returns:
         tuple: (playwright instance, browser, context, page)
@@ -54,7 +48,7 @@ def setup_browser(
     playwright = sync_playwright().start()
 
     browser = playwright.chromium.launch(
-        headless=headless,
+        headless=True,
         args=[
             "--no-sandbox",
             "--disable-dev-shm-usage",
@@ -66,14 +60,11 @@ def setup_browser(
 
     context = browser.new_context(no_viewport=True)
 
-    if block_resources:
-        # Block images, fonts, media to speed up
-        context.route(
-            "**/*.{png,jpg,jpeg,gif,svg,woff,woff2,mp4,webm}", lambda route: route.abort()
-        )
-        # Block analytics
-        context.route("**/analytics.google.com/**", lambda route: route.abort())
-        context.route("**/googletagmanager.com/**", lambda route: route.abort())
+    # Block images, fonts, media to speed up
+    context.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,mp4,webm}", lambda route: route.abort())
+    # Block analytics
+    context.route("**/analytics.google.com/**", lambda route: route.abort())
+    context.route("**/googletagmanager.com/**", lambda route: route.abort())
 
     page = context.new_page()
     page.set_default_timeout(DEFAULT_TIMEOUT)

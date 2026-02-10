@@ -16,7 +16,7 @@ from google_flights_scraper.validators import (
 def airport_df():
     """Load actual airport codes DataFrame for testing."""
     # From tests/ directory, go up one level to project root, then into data/
-    test_dir = Path(__file__).parent
+    test_dir = Path(__file__).parent.parent
     csv_path = test_dir.parent / "data" / "airport_codes.csv"
     return pd.read_csv(csv_path)
 
