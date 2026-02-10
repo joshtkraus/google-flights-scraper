@@ -1,0 +1,203 @@
+"""Essential unit tests for jupyter_helper.py - subprocess logic only."""
+
+import pytest
+import json
+from unittest.mock import MagicMock, patch
+from google_flights_scraper.jupyter_helper import (
+    _run_script,
+    scrape_flight,
+    scrape_multiple_destinations,
+    scrape_date_range,
+)
+
+
+class TestRunScript:
+    """Tests for _run_script subprocess execution."""
+
+    @patch('subprocess.run')
+    @patch('tempfile.NamedTemporaryFile')
+    @patch('os.unlink')
+    def test_executes_script_and_parses_json(self, mock_unlink, mock_tempfile, mock_run):
+        """Test that script is executed and JSON is parsed."""
+        # Mock temp file
+        mock_file = MagicMock()
+        mock_file.name = '/tmp/test.py'
+        mock_tempfile.return_value.__enter__.return_value = mock_file
+
+        # Mock subprocess result
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"price": 250, "status": "success"}'
+        mock_result.stderr = ''
+        mock_run.return_value = mock_result
+
+        # Execute
+        result = _run_script('print("test")', parse_as_json=True)
+
+        # Verify JSON parsed
+        assert result == {"price": 250, "status": "success"}
+
+        # Verify temp file cleaned up
+        mock_unlink.assert_called_once_with('/tmp/test.py')
+
+    @patch('subprocess.run')
+    @patch('tempfile.NamedTemporaryFile')
+    @patch('os.unlink')
+    def test_returns_raw_text_when_parse_as_json_false(self, mock_unlink, mock_tempfile, mock_run):
+        """Test that raw stdout returned when parse_as_json is False."""
+        mock_file = MagicMock()
+        mock_file.name = '/tmp/test.py'
+        mock_tempfile.return_value.__enter__.return_value = mock_file
+
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = 'plain text output'
+        mock_result.stderr = ''
+        mock_run.return_value = mock_result
+
+        result = _run_script('print("test")', parse_as_json=False)
+
+        assert result == 'plain text output'
+
+    @patch('subprocess.run')
+    @patch('tempfile.NamedTemporaryFile')
+    @patch('os.unlink')
+    def test_raises_exception_on_nonzero_return_code(self, mock_unlink, mock_tempfile, mock_run):
+        """Test that exception raised when subprocess fails."""
+        mock_file = MagicMock()
+        mock_file.name = '/tmp/test.py'
+        mock_tempfile.return_value.__enter__.return_value = mock_file
+
+        mock_result = MagicMock()
+        mock_result.returncode = 1
+        mock_result.stderr = 'Error message'
+        mock_run.return_value = mock_result
+
+        with pytest.raises(Exception, match="Script execution failed"):
+            _run_script('invalid script')
+
+    @patch('subprocess.run')
+    @patch('tempfile.NamedTemporaryFile')
+    @patch('os.unlink')
+    def test_cleans_up_temp_file_even_on_error(self, mock_unlink, mock_tempfile, mock_run):
+        """Test that temp file is cleaned up even when execution fails."""
+        mock_file = MagicMock()
+        mock_file.name = '/tmp/test.py'
+        mock_tempfile.return_value.__enter__.return_value = mock_file
+
+        mock_result = MagicMock()
+        mock_result.returncode = 1
+        mock_run.return_value = mock_result
+
+        try:
+            _run_script('bad script')
+        except Exception:
+            pass
+
+        # Verify cleanup still happened
+        mock_unlink.assert_called_once_with('/tmp/test.py')
+
+
+class TestScrapeFlightScriptGeneration:
+    """Tests for scrape_flight script generation."""
+
+    @patch('google_flights_scraper.jupyter_helper._run_script')
+    def test_generates_correct_script_with_all_parameters(self, mock_run_script):
+        """Test that generated script contains all parameters correctly."""
+        mock_run_script.return_value = {"price": 250}
+
+        scrape_flight(
+            "LAX", "USA", "SFO", "USA",
+            "03/15/2026", "03/22/2026", "Economy"
+        )
+
+        script = mock_run_script.call_args[0][0]
+
+        # Verify key elements
+        assert "from google_flights_scraper import GoogleFlightsScraper" in script
+        assert 'departure_code="LAX"' in script
+        assert 'arrival_code="SFO"' in script
+        assert "json.dumps(result" in script
+
+    @patch('google_flights_scraper.jupyter_helper._run_script')
+    def test_handles_export_path_correctly(self, mock_run_script):
+        """Test that export_path is handled correctly (None vs string)."""
+        mock_run_script.return_value = {"price": 250}
+
+        # Test with None
+        scrape_flight("LAX", "USA", "SFO", "USA", "03/15/2026", "03/22/2026", "Economy", export_path=None)
+        script_none = mock_run_script.call_args[0][0]
+        assert "export_path=None" in script_none
+
+        # Test with value
+        scrape_flight("LAX", "USA", "SFO", "USA", "03/15/2026", "03/22/2026", "Economy", export_path="out.json")
+        script_value = mock_run_script.call_args[0][0]
+        assert 'export_path="out.json"' in script_value
+
+
+class TestScrapeMultipleDestinationsScriptGeneration:
+    """Tests for scrape_multiple_destinations script generation."""
+
+    @patch('google_flights_scraper.jupyter_helper._run_script')
+    @patch('pandas.DataFrame')
+    def test_passes_list_parameters_correctly(self, mock_df, mock_run_script):
+        """Test that list parameters are correctly formatted in script."""
+        mock_run_script.return_value = [{"price": 200}]
+
+        scrape_multiple_destinations(
+            "LAX", "USA",
+            ["SFO", "SEA"],
+            ["USA", "USA"],
+            "03/15/2026", "03/22/2026",
+            ["Economy", "Economy"]
+        )
+
+        script = mock_run_script.call_args[0][0]
+
+        # Verify lists are in script
+        assert "['SFO', 'SEA']" in script
+        assert "['USA', 'USA']" in script
+        assert "['Economy', 'Economy']" in script
+
+
+class TestScrapeDateRangeScriptGeneration:
+    """Tests for scrape_date_range script generation."""
+
+    @patch('google_flights_scraper.jupyter_helper._run_script')
+    @patch('pandas.DataFrame')
+    def test_passes_integer_params_without_quotes(self, mock_df, mock_run_script):
+        """Test that integer parameters are not quoted in script."""
+        mock_run_script.return_value = [{"price": 200}]
+
+        scrape_date_range(
+            "LAX", "USA", "SFO", "USA",
+            "03/15/2026", "03/20/2026",
+            min_trip_length=2,
+            max_trip_length=5,
+            seat_class="Economy"
+        )
+
+        script = mock_run_script.call_args[0][0]
+
+        # Should be integers, not strings
+        assert "min_trip_length=2" in script
+        assert "max_trip_length=5" in script
+        assert 'min_trip_length="2"' not in script
+
+    @patch('google_flights_scraper.jupyter_helper._run_script')
+    @patch('pandas.DataFrame')
+    def test_passes_float_params_without_quotes(self, mock_df, mock_run_script):
+        """Test that float parameters are not quoted in script."""
+        mock_run_script.return_value = [{"price": 200}]
+
+        scrape_date_range(
+            "LAX", "USA", "SFO", "USA",
+            "03/15/2026", "03/20/2026", 2, 5, "Economy",
+            delay_seconds=2.5
+        )
+
+        script = mock_run_script.call_args[0][0]
+
+        # Should be float, not string
+        assert "delay_seconds=2.5" in script
+        assert 'delay_seconds="2.5"' not in script

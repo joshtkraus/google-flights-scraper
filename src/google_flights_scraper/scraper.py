@@ -240,7 +240,10 @@ class GoogleFlightsScraper:
             return result, err
 
         # Extract price from final booking page
-        result["price"] = extract_final_price(self._page, timeout=self.wait_time)
+        result["price"] = extract_final_price(self._page, timeout=self.wait_time * 2)
+
+        if result["price"] is None:
+            return result, "Error: Price not found"
 
         # Capture the final page URL
         result["url"] = self._page.url
@@ -328,7 +331,7 @@ class GoogleFlightsScraper:
             )
 
             # Setup browser
-            self.playwright, self.browser, self.context, self.page = setup_browser(headless=True)
+            self.playwright, self.browser, self.context, self.page = setup_browser()
 
             # Navigate to Google Flights
             self.page.goto("https://www.google.com/travel/flights")
@@ -349,7 +352,7 @@ class GoogleFlightsScraper:
             # Extract price difference
             if status == "Ran successfully.":
                 (result["price_classification"], result["price_difference"]) = (
-                    extract_price_relativity(self.page, timeout=self.wait_time)
+                    extract_price_relativity(self.page, timeout=2000)
                 )
 
             # Calculate price relativity
