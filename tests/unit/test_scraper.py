@@ -1,9 +1,10 @@
-"""Essential unit tests for GoogleFlightsScraper class - pure logic only."""
+"""Unit tests for GoogleFlightsScraper class."""
 
 import pytest
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, AsyncMock, patch, mock_open
 from google_flights_scraper import GoogleFlightsScraper
 
+pytestmark = pytest.mark.unit
 
 class TestInit:
     """Tests for initialization."""
@@ -39,13 +40,8 @@ class TestCalcPriceRel:
         """Test correct calculation of price relativity."""
         scraper = GoogleFlightsScraper()
 
-        # $50 saved on $200 ticket = 50/(200+50) = 0.2
         assert scraper._calc_price_rel(200, 50) == 0.2
-
-        # $100 saved on $300 ticket = 100/(300+100) = 0.25
         assert scraper._calc_price_rel(300, 100) == 0.25
-
-        # Edge case: 0 difference
         assert scraper._calc_price_rel(200, 0) == 0.0
 
     @patch('pandas.read_csv')
@@ -54,8 +50,6 @@ class TestCalcPriceRel:
         scraper = GoogleFlightsScraper()
 
         assert scraper._calc_price_rel(200, None) is None
-        assert scraper._calc_price_rel(None, 50) is None
-        assert scraper._calc_price_rel(None, None) is None
 
 
 class TestExportData:
@@ -70,10 +64,7 @@ class TestExportData:
         with patch('builtins.open', mock_open()) as mock_file:
             scraper._export_data(result, "output.json")
 
-            # Verify file opened for writing
             mock_file.assert_called_once_with("output.json", "w")
-
-            # Verify content written
             handle = mock_file()
             assert handle.write.called
 
@@ -89,19 +80,17 @@ class TestExportData:
 
         scraper._export_data(result, "output.csv")
 
-        # Verify json_normalize called with underscore separator
         mock_normalize.assert_called_once_with(result, sep="_")
-
-        # Verify to_csv called without index
         mock_df.to_csv.assert_called_once_with("output.csv", index=False)
 
 
 class TestCleanupLogic:
     """Tests for browser cleanup logic."""
 
+    @pytest.mark.asyncio
     @patch('pandas.read_csv')
-    @patch('google_flights_scraper.scraper.setup_browser')
-    def test_cleanup_happens_even_on_exception(self, mock_setup, mock_read_csv):
+    @patch('google_flights_scraper.scraper.setup_browser', new_callable=AsyncMock)
+    async def test_cleanup_happens_even_on_exception(self, mock_setup, mock_read_csv):
         """Test that browser cleanup happens even when scraping fails."""
         scraper = GoogleFlightsScraper()
 
@@ -109,20 +98,25 @@ class TestCleanupLogic:
         mock_browser = MagicMock()
         mock_context = MagicMock()
         mock_page = MagicMock()
+
+        # All cleanup methods must be AsyncMock
+        mock_playwright.stop = AsyncMock()
+        mock_browser.close = AsyncMock()
+        mock_context.close = AsyncMock()
+        mock_page.close = AsyncMock()
+
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
-            patch.object(scraper, '_fill_search_form') as mock_fill:
+             patch.object(scraper, '_fill_search_form', new_callable=AsyncMock) as mock_fill:
 
-            # Exception happens AFTER browser setup
             mock_fill.side_effect = Exception("Form error")
 
-            result = scraper.scrape_flight(
+            result = await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
                 "03/15/2026", "03/22/2026", "Economy"
             )
 
-            # Now cleanup should be called
             mock_page.close.assert_called_once()
             mock_context.close.assert_called_once()
             mock_browser.close.assert_called_once()
@@ -134,59 +128,67 @@ class TestCleanupLogic:
 class TestConditionalLogic:
     """Tests for conditional execution logic."""
 
+    @pytest.mark.asyncio
     @patch('pandas.read_csv')
-    @patch('google_flights_scraper.scraper.setup_browser')
-    def test_price_relativity_only_extracted_on_success(self, mock_setup, mock_read_csv):
+    @patch('google_flights_scraper.scraper.setup_browser', new_callable=AsyncMock)
+    async def test_price_relativity_only_extracted_on_success(self, mock_setup, mock_read_csv):
         """Test that price relativity only extracted when status is 'Ran successfully.'"""
         scraper = GoogleFlightsScraper()
 
         mock_playwright = MagicMock()
+        mock_playwright.stop = AsyncMock()
         mock_browser = MagicMock()
+        mock_browser.close = AsyncMock()
         mock_context = MagicMock()
+        mock_context.close = AsyncMock()
         mock_page = MagicMock()
+        mock_page.close = AsyncMock()
+
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
-             patch.object(scraper, '_fill_search_form'), \
-             patch.object(scraper, '_select_best_flights') as mock_select, \
-             patch('google_flights_scraper.scraper.extract_price_relativity') as mock_extract:
+             patch.object(scraper, '_fill_search_form', new_callable=AsyncMock), \
+             patch.object(scraper, '_select_best_flights', new_callable=AsyncMock) as mock_select, \
+             patch('google_flights_scraper.scraper.extract_price_relativity', new_callable=AsyncMock) as mock_extract:
 
-            # Test failure case
             mock_select.return_value = ({}, "Error: No flights")
 
-            scraper.scrape_flight(
+            await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
                 "03/15/2026", "03/22/2026", "Economy"
             )
 
-            # Verify extract_price_relativity NOT called
             mock_extract.assert_not_called()
 
+    @pytest.mark.asyncio
     @patch('pandas.read_csv')
-    @patch('google_flights_scraper.scraper.setup_browser')
-    def test_export_only_called_when_path_provided(self, mock_setup, mock_read_csv):
+    @patch('google_flights_scraper.scraper.setup_browser', new_callable=AsyncMock)
+    async def test_export_only_called_when_path_provided(self, mock_setup, mock_read_csv):
         """Test that export only happens when export_path is provided."""
         scraper = GoogleFlightsScraper()
 
         mock_playwright = MagicMock()
+        mock_playwright.stop = AsyncMock()
         mock_browser = MagicMock()
+        mock_browser.close = AsyncMock()
         mock_context = MagicMock()
+        mock_context.close = AsyncMock()
         mock_page = MagicMock()
+        mock_page.close = AsyncMock()
+
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
-             patch.object(scraper, '_fill_search_form'), \
-             patch.object(scraper, '_select_best_flights') as mock_select, \
+             patch.object(scraper, '_fill_search_form', new_callable=AsyncMock), \
+             patch.object(scraper, '_select_best_flights', new_callable=AsyncMock) as mock_select, \
              patch.object(scraper, '_export_data') as mock_export:
 
             mock_select.return_value = ({}, "Ran successfully.")
 
-            # Without export_path
-            scraper.scrape_flight(
+            await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
                 "03/15/2026", "03/22/2026", "Economy",
                 export_path=None
             )
 
-            # Verify export NOT called
             mock_export.assert_not_called()

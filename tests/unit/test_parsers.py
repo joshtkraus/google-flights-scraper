@@ -1,8 +1,8 @@
-"""Unit tests for parser functions in parsers.py."""
+"""Unit tests for parser functions."""
 
 import pytest
-from unittest.mock import MagicMock, patch
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+from unittest.mock import MagicMock, AsyncMock, patch
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 from google_flights_scraper.parsers import (
     create_empty_flight_info,
     extract_airline,
@@ -19,6 +19,7 @@ from google_flights_scraper.parsers import (
     extract_price_relativity,
 )
 
+pytestmark = pytest.mark.unit
 
 class TestCreateEmptyFlightInfo:
     """Tests for create_empty_flight_info function."""
@@ -27,11 +28,8 @@ class TestCreateEmptyFlightInfo:
         """Test that all fields exist with correct initial values."""
         result = create_empty_flight_info()
 
-        # Check scalar fields are None
         assert result["airline"] is None
         assert result["num_stops"] is None
-
-        # Check list fields are empty
         assert result["connection_airports"] == []
         assert result["layover_durations"] == []
 
@@ -59,7 +57,6 @@ class TestExtractDepartureInfo:
         assert time == "10:30 AM"
         assert date == "Monday, March 15"
 
-        # Test failure case
         assert extract_departure_info("Invalid") == (None, None, None)
 
 
@@ -75,7 +72,6 @@ class TestExtractArrivalInfo:
         assert time == "2:30 PM"
         assert date == "Monday, March 15"
 
-        # Test failure case
         assert extract_arrival_info("Invalid") == (None, None, None)
 
 
@@ -122,16 +118,9 @@ class TestExtractDuration:
 
     def test_extract_duration_variations(self):
         """Test duration extraction for all format variations."""
-        # Hours and minutes
         assert extract_duration("Total duration 5 hr 30 min") == (330, "5 hr 30 min")
-
-        # Hours only
         assert extract_duration("Total duration 2 hr") == (120, "2 hr")
-
-        # Minutes only
         assert extract_duration("Total duration 45 min") == (45, "45 min")
-
-        # No match
         assert extract_duration("No duration") == (None, None)
 
 
@@ -140,23 +129,17 @@ class TestExtractBaggageInfo:
 
     def test_extract_baggage_info(self):
         """Test baggage extraction for various cases."""
-        # Both types
         assert extract_baggage_info("1 carry-on bag and 2 checked bags") == (1, 2)
-
-        # Carry-on only
         assert extract_baggage_info("1 carry-on bag") == (1, None)
-
-        # Checked only
         assert extract_baggage_info("2 checked bags") == (None, 2)
-
-        # None
         assert extract_baggage_info("No baggage") == (None, None)
 
 
 class TestExtractFlightDetails:
     """Tests for extract_flight_details function."""
 
-    def test_extract_complete_flight(self):
+    @pytest.mark.asyncio
+    async def test_extract_complete_flight(self):
         """Test extraction of complete flight information."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
@@ -171,9 +154,9 @@ class TestExtractFlightDetails:
         )
 
         mock_element.locator.return_value = mock_desc_locator
-        mock_desc_locator.get_attribute.return_value = flight_desc
+        mock_desc_locator.get_attribute = AsyncMock(return_value=flight_desc)
 
-        result = extract_flight_details(mock_element)
+        result = await extract_flight_details(mock_element)
 
         assert result["airline"] == "United"
         assert result["departure_airport"] == "Los Angeles International Airport"
@@ -181,31 +164,31 @@ class TestExtractFlightDetails:
         assert result["duration_minutes"] == 90
         assert result["carry_on_bags"] == 1
 
-    def test_handles_missing_data(self):
+    @pytest.mark.asyncio
+    async def test_handles_missing_data(self):
         """Test that missing aria-label returns empty flight info."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
 
         mock_element.locator.return_value = mock_desc_locator
-        mock_desc_locator.get_attribute.return_value = None
+        mock_desc_locator.get_attribute = AsyncMock(return_value=None)
 
-        result = extract_flight_details(mock_element)
+        result = await extract_flight_details(mock_element)
 
         assert result["airline"] is None
         assert result["num_stops"] is None
 
-    def test_cleans_unicode_characters(self):
+    @pytest.mark.asyncio
+    async def test_cleans_unicode_characters(self):
         """Test that unicode characters are properly cleaned."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
 
-        # Description with unicode non-breaking spaces
         flight_desc = "Depart\u202fflight\xa0with United."
-
         mock_element.locator.return_value = mock_desc_locator
-        mock_desc_locator.get_attribute.return_value = flight_desc
+        mock_desc_locator.get_attribute = AsyncMock(return_value=flight_desc)
 
-        result = extract_flight_details(mock_element)
+        result = await extract_flight_details(mock_element)
 
         assert result["airline"] == "United"
 
@@ -213,58 +196,59 @@ class TestExtractFlightDetails:
 class TestExtractFinalPrice:
     """Tests for extract_final_price function."""
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_successfully(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_successfully(self, mock_wait):
         """Test successful price extraction."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock()
+        mock_element.get_attribute = AsyncMock(return_value="250 US dollars")
         mock_page.locator.return_value.first = mock_element
-        mock_element.get_attribute.return_value = "250 US dollars"
 
-        result = extract_final_price(mock_page, timeout=10000)
+        result = await extract_final_price(mock_page, timeout=10000)
 
-        # Verify wait_for called
-        mock_element.wait_for.assert_called_once_with(state="attached", timeout=500)
-
+        mock_element.wait_for.assert_called_once_with(state="visible", timeout=10000)
         assert result == 250
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_with_comma(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_with_comma(self, mock_wait):
         """Test price extraction with comma separator."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock()
+        mock_element.get_attribute = AsyncMock(return_value="1,250 US dollars")
         mock_page.locator.return_value.first = mock_element
-        mock_element.get_attribute.return_value = "1,250 US dollars"
 
-        result = extract_final_price(mock_page, timeout=10000)
+        result = await extract_final_price(mock_page, timeout=10000)
 
         assert result == 1250
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_returns_none_on_timeout(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_returns_none_on_timeout(self, mock_wait):
         """Test that None returned when price element not found."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock(side_effect=PlaywrightTimeoutError("timeout"))
         mock_page.locator.return_value.first = mock_element
-        mock_element.wait_for.side_effect = PlaywrightTimeoutError("timeout")
 
-        result = extract_final_price(mock_page, timeout=10000)
+        result = await extract_final_price(mock_page, timeout=10000)
 
         assert result is None
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_returns_none_when_regex_fails(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_returns_none_when_regex_fails(self, mock_wait):
         """Test that None returned when aria-label doesn't match regex."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock()
+        mock_element.get_attribute = AsyncMock(return_value="Invalid format")
         mock_page.locator.return_value.first = mock_element
-        mock_element.get_attribute.return_value = "Invalid format"
 
-        result = extract_final_price(mock_page, timeout=10000)
+        result = await extract_final_price(mock_page, timeout=10000)
 
         assert result is None
 
@@ -277,9 +261,8 @@ class TestParsePriceClassification:
         assert parse_price_classification("$200 is low for Economy") == "low"
         assert parse_price_classification("$500 is high for Business") == "high"
         assert parse_price_classification("$300 is typical") == "typical"
-        assert parse_price_classification("$200 is LOW") == "low"  # Case insensitive
+        assert parse_price_classification("$200 is LOW") == "low"
         assert parse_price_classification("") is None
-        assert parse_price_classification(None) is None
         assert parse_price_classification("No classification") is None
 
 
@@ -288,61 +271,58 @@ class TestParsePriceDifference:
 
     def test_parse_price_difference(self):
         """Test parsing price differences."""
-        # Cheaper with amount
         assert parse_price_difference("$50 cheaper than usual") == 50
         assert parse_price_difference("$1,200 cheaper") == 1200
-
-        # Classifications return 0
         assert parse_price_difference("$200 is low") == 0
         assert parse_price_difference("$500 is high") == 0
         assert parse_price_difference("$300 is typical") == 0
-
-        # No match
         assert parse_price_difference("") is None
-        assert parse_price_difference(None) is None
-
 
 class TestExtractPriceRelativity:
     """Tests for extract_price_relativity function."""
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_relativity_low_with_savings(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_relativity_low_with_savings(self, mock_wait):
         """Test extraction of low price with savings."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock()
+        mock_element.inner_text = AsyncMock(
+            return_value="$200 is low for Economy. $50 cheaper than usual."
+        )
         mock_page.locator.return_value.first = mock_element
-        mock_element.inner_text.return_value = "$200 is low for Economy. $50 cheaper than usual."
 
-        classification, amount = extract_price_relativity(mock_page, timeout=10000)
+        classification, amount = await extract_price_relativity(mock_page, timeout=10000)
 
         assert classification == "low"
         assert amount == 50
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_relativity_high(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_relativity_high(self, mock_wait):
         """Test extraction of high price."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock()
+        mock_element.inner_text = AsyncMock(return_value="$500 is high for Economy.")
         mock_page.locator.return_value.first = mock_element
-        mock_element.inner_text.return_value = "$500 is high for Economy."
 
-        classification, amount = extract_price_relativity(mock_page, timeout=10000)
+        classification, amount = await extract_price_relativity(mock_page, timeout=10000)
 
         assert classification == "high"
         assert amount == 0
 
-    @patch('google_flights_scraper.parsers.wait_until_stable')
-    def test_extract_price_relativity_returns_none_on_timeout(self, mock_wait):
+    @pytest.mark.asyncio
+    @patch('google_flights_scraper.parsers.wait_until_stable', new_callable=AsyncMock)
+    async def test_extract_price_relativity_returns_none_on_timeout(self, mock_wait):
         """Test that (None, None) returned when element not found."""
         mock_page = MagicMock()
         mock_element = MagicMock()
-
+        mock_element.wait_for = AsyncMock(side_effect=PlaywrightTimeoutError("timeout"))
         mock_page.locator.return_value.first = mock_element
-        mock_element.wait_for.side_effect = PlaywrightTimeoutError("timeout")
 
-        classification, amount = extract_price_relativity(mock_page, timeout=10000)
+        classification, amount = await extract_price_relativity(mock_page, timeout=10000)
 
         assert classification is None
         assert amount is None

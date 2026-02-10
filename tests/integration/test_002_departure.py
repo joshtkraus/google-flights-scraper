@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # List of results
 RESULTS = [
     "domestic_economy_basic",
