@@ -1,16 +1,18 @@
 """Fixtures for integration tests."""
 
 import pytest
+import pytest_asyncio
 
 from datetime import datetime, timedelta
 from google_flights_scraper import GoogleFlightsScraper
 
+pytestmark = pytest.mark.integration
+
 # Get today's date
 today = datetime.today()
 
-
-@pytest.fixture(scope="session")
-def domestic_economy_basic():
+@pytest_asyncio.fixture(scope="session")
+async def domestic_economy_basic():
     """Domestic flight from LAX to New York with Basic Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
@@ -18,7 +20,7 @@ def domestic_economy_basic():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="LAX",
         departure_country="United States of America",
         arrival_code="New York",
@@ -28,8 +30,8 @@ def domestic_economy_basic():
         seat_class="Economy (include Basic)"
     )
 
-@pytest.fixture(scope="session")
-def domestic_economy_non_basic():
+@pytest_asyncio.fixture(scope="session")
+async def domestic_economy_non_basic():
     """Domestic flight from ATL to SEA with non-Basic Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=3)).strftime("%m/%d/%Y")
@@ -37,7 +39,7 @@ def domestic_economy_non_basic():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="ATL",
         departure_country="United States of America",
         arrival_code="SEA",
@@ -47,8 +49,8 @@ def domestic_economy_non_basic():
         seat_class="Economy (exclude Basic)",
     )
 
-@pytest.fixture(scope="session")
-def domestic_premium_economy():
+@pytest_asyncio.fixture(scope="session")
+async def domestic_premium_economy():
     """Domestic flight from New York to Chicago with Premium Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=6)).strftime("%m/%d/%Y")
@@ -56,7 +58,7 @@ def domestic_premium_economy():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="New York",
         departure_country="United States of America",
         arrival_code="Chicago",
@@ -66,8 +68,8 @@ def domestic_premium_economy():
         seat_class="Premium economy",
     )
 
-@pytest.fixture(scope="session")
-def domestic_business():
+@pytest_asyncio.fixture(scope="session")
+async def domestic_business():
     """Domestic flight from LAX to SFO with Business class."""
     # Create Dates
     start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
@@ -75,7 +77,7 @@ def domestic_business():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="LAX",
         departure_country="United States of America",
         arrival_code="SFO",
@@ -85,8 +87,8 @@ def domestic_business():
         seat_class="Business",
     )
 
-@pytest.fixture(scope="session")
-def domestic_first():
+@pytest_asyncio.fixture(scope="session")
+async def domestic_first():
     """Domestic flight from Chicago to LAX with First class."""
     # Create Dates
     start = (today + timedelta(weeks=7)).strftime("%m/%d/%Y")
@@ -94,7 +96,7 @@ def domestic_first():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="Chicago",
         departure_country="United States of America",
         arrival_code="LAX",
@@ -104,8 +106,8 @@ def domestic_first():
         seat_class="First",
     )
 
-@pytest.fixture(scope="session")
-def int_economy():
+@pytest_asyncio.fixture(scope="session")
+async def int_economy():
     """International flight from New York to London with Basic Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=7)).strftime("%m/%d/%Y")
@@ -113,7 +115,7 @@ def int_economy():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="New York",
         departure_country="United States of America",
         arrival_code="London",
@@ -123,8 +125,8 @@ def int_economy():
         seat_class="Economy",
     )
 
-@pytest.fixture(scope="session")
-def int_premium_economy():
+@pytest_asyncio.fixture(scope="session")
+async def int_premium_economy():
     """International flight from New York to CDG with Premium Economy class."""
     # Create Dates
     start = (today + timedelta(weeks=9)).strftime("%m/%d/%Y")
@@ -132,7 +134,7 @@ def int_premium_economy():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="New York",
         departure_country="United States of America",
         arrival_code="CDG",
@@ -142,8 +144,8 @@ def int_premium_economy():
         seat_class="Premium economy",
     )
 
-@pytest.fixture(scope="session")
-def int_business():
+@pytest_asyncio.fixture(scope="session")
+async def int_business():
     """International flight from LAX to London with Business class."""
     # Create Dates
     start = (today + timedelta(weeks=10)).strftime("%m/%d/%Y")
@@ -151,7 +153,7 @@ def int_business():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="LAX",
         departure_country="United States of America",
         arrival_code="London",
@@ -161,8 +163,8 @@ def int_business():
         seat_class="Business",
     )
 
-@pytest.fixture(scope="session")
-def int_first():
+@pytest_asyncio.fixture(scope="session")
+async def int_first():
     """International flight from SFO to TPE with First class."""
     # Create Dates
     start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
@@ -170,7 +172,7 @@ def int_first():
 
     scraper = GoogleFlightsScraper()
 
-    return scraper.scrape_flight(
+    return await scraper.scrape_flight(
         departure_code="SFO",
         departure_country="United States of America",
         arrival_code="TPE",

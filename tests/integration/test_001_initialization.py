@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # List of results
 RESULTS = [
     "domestic_economy_basic",
@@ -19,7 +21,6 @@ RESULTS = [
 def test_results_return(scraper_fixture, request):
     """Test that scraper returns non-empty dict."""
     result = request.getfixturevalue(scraper_fixture)
-    print(result)
     assert isinstance(result, dict)
     assert len(result.keys()) > 0
 

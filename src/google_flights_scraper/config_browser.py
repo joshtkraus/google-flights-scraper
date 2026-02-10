@@ -1,6 +1,8 @@
 """Configuration constants and browser setup for Google Flights scraper."""
 
-from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
+import random
+
+from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
 
 # Valid seat class options
 VALID_CLASSES_DOMESTIC_US = [
@@ -38,16 +40,52 @@ SEAT_CLASS_OPTION_MAPPING = {
 # Default timeout (ms)
 DEFAULT_TIMEOUT = 10000  # 10 seconds
 
+# Realistic Chrome user agents across Windows, macOS, Linux
+USER_AGENTS = [
+    # Chrome on Windows
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    # Chrome on macOS
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_1) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6_3) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+    # Chrome on Linux
+    "Mozilla/5.0 (X11; Linux x86_64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (X11; Linux x86_64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+]
 
-def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
-    """Setup Playwright browser with appropriate options.
+
+def get_random_user_agent() -> str:
+    """Return a random user agent string from the pool.
+
+    Returns:
+        str: A randomly selected user agent string
+    """
+    return random.choice(USER_AGENTS)
+
+
+async def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
+    """Setup Playwright browser with appropriate options and a randomized user agent.
 
     Returns:
         tuple: (playwright instance, browser, context, page)
     """
-    playwright = sync_playwright().start()
+    playwright = await async_playwright().start()
 
-    browser = playwright.chromium.launch(
+    browser = await playwright.chromium.launch(
         headless=True,
         args=[
             "--no-sandbox",
@@ -58,15 +96,20 @@ def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
         ],
     )
 
-    context = browser.new_context(no_viewport=True)
+    context = await browser.new_context(
+        no_viewport=True,
+        user_agent=get_random_user_agent(),
+    )
 
     # Block images, fonts, media to speed up
-    context.route("**/*.{png,jpg,jpeg,gif,svg,woff,woff2,mp4,webm}", lambda route: route.abort())
+    await context.route(
+        "**/*.{png,jpg,jpeg,gif,svg,woff,woff2,mp4,webm}", lambda route: route.abort()
+    )
     # Block analytics
-    context.route("**/analytics.google.com/**", lambda route: route.abort())
-    context.route("**/googletagmanager.com/**", lambda route: route.abort())
+    await context.route("**/analytics.google.com/**", lambda route: route.abort())
+    await context.route("**/googletagmanager.com/**", lambda route: route.abort())
 
-    page = context.new_page()
+    page = await context.new_page()
     page.set_default_timeout(DEFAULT_TIMEOUT)
 
     return playwright, browser, context, page
