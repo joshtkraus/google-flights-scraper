@@ -1804,10 +1804,7 @@
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/google_flights_scraper/interactions.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-237">237</a></span>
-<span class="normal"><a href="#__codelineno-0-238">238</a></span>
-<span class="normal"><a href="#__codelineno-0-239">239</a></span>
-<span class="normal"><a href="#__codelineno-0-240">240</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-240">240</a></span>
 <span class="normal"><a href="#__codelineno-0-241">241</a></span>
 <span class="normal"><a href="#__codelineno-0-242">242</a></span>
 <span class="normal"><a href="#__codelineno-0-243">243</a></span>
@@ -1827,30 +1824,33 @@
 <span class="normal"><a href="#__codelineno-0-257">257</a></span>
 <span class="normal"><a href="#__codelineno-0-258">258</a></span>
 <span class="normal"><a href="#__codelineno-0-259">259</a></span>
-<span class="normal"><a href="#__codelineno-0-260">260</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-237" name="__codelineno-0-237"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_and_select_best_flight</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="n">Page</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-<a id="__codelineno-0-238" name="__codelineno-0-238"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the best (first) flight option on the page.</span>
-<a id="__codelineno-0-239" name="__codelineno-0-239"></a>
-<a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="sd">        page (Page): Playwright Page instance</span>
-<a id="__codelineno-0-242" name="__codelineno-0-242"></a><span class="sd">        timeout (int): Timeout for waiting operations</span>
-<a id="__codelineno-0-243" name="__codelineno-0-243"></a>
-<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">        Locator: The best flight element locator, or None if not found</span>
-<a id="__codelineno-0-246" name="__codelineno-0-246"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-247" name="__codelineno-0-247"></a>    <span class="c1"># Wait for page to fully load</span>
-<a id="__codelineno-0-248" name="__codelineno-0-248"></a>    <span class="n">wait_until_stable</span><span class="p">(</span>
-<a id="__codelineno-0-249" name="__codelineno-0-249"></a>        <span class="n">page</span><span class="p">,</span>
-<a id="__codelineno-0-250" name="__codelineno-0-250"></a>        <span class="s2">&quot;div[role=&#39;progressbar&#39;]&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-251" name="__codelineno-0-251"></a>        <span class="n">stable_duration</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
-<a id="__codelineno-0-252" name="__codelineno-0-252"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
-<a id="__codelineno-0-253" name="__codelineno-0-253"></a>    <span class="p">)</span>
-<a id="__codelineno-0-254" name="__codelineno-0-254"></a>
-<a id="__codelineno-0-255" name="__codelineno-0-255"></a>    <span class="c1"># Find best flight (first option)</span>
-<a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-257" name="__codelineno-0-257"></a>        <span class="n">best_flight</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="s2">&quot;ul[role=&#39;list&#39;]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="s2">&quot;li&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<a id="__codelineno-0-258" name="__codelineno-0-258"></a>        <span class="k">return</span> <span class="n">best_flight</span>
-<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="k">except</span> <span class="n">PlaywrightTimeoutError</span><span class="p">:</span>
-<a id="__codelineno-0-260" name="__codelineno-0-260"></a>        <span class="k">return</span> <span class="kc">None</span>
+<span class="normal"><a href="#__codelineno-0-260">260</a></span>
+<span class="normal"><a href="#__codelineno-0-261">261</a></span>
+<span class="normal"><a href="#__codelineno-0-262">262</a></span>
+<span class="normal"><a href="#__codelineno-0-263">263</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-240" name="__codelineno-0-240"></a><span class="k">def</span><span class="w"> </span><span class="nf">find_and_select_best_flight</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="n">Page</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<a id="__codelineno-0-241" name="__codelineno-0-241"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Find and return the best (first) flight option on the page.</span>
+<a id="__codelineno-0-242" name="__codelineno-0-242"></a>
+<a id="__codelineno-0-243" name="__codelineno-0-243"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-244" name="__codelineno-0-244"></a><span class="sd">        page (Page): Playwright Page instance</span>
+<a id="__codelineno-0-245" name="__codelineno-0-245"></a><span class="sd">        timeout (int): Timeout for waiting operations</span>
+<a id="__codelineno-0-246" name="__codelineno-0-246"></a>
+<a id="__codelineno-0-247" name="__codelineno-0-247"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-248" name="__codelineno-0-248"></a><span class="sd">        Locator: The best flight element locator, or None if not found</span>
+<a id="__codelineno-0-249" name="__codelineno-0-249"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-250" name="__codelineno-0-250"></a>    <span class="c1"># Wait for page to fully load</span>
+<a id="__codelineno-0-251" name="__codelineno-0-251"></a>    <span class="n">wait_until_stable</span><span class="p">(</span>
+<a id="__codelineno-0-252" name="__codelineno-0-252"></a>        <span class="n">page</span><span class="p">,</span>
+<a id="__codelineno-0-253" name="__codelineno-0-253"></a>        <span class="s2">&quot;div[role=&#39;progressbar&#39;]&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-254" name="__codelineno-0-254"></a>        <span class="n">stable_duration</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<a id="__codelineno-0-255" name="__codelineno-0-255"></a>        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+<a id="__codelineno-0-256" name="__codelineno-0-256"></a>    <span class="p">)</span>
+<a id="__codelineno-0-257" name="__codelineno-0-257"></a>
+<a id="__codelineno-0-258" name="__codelineno-0-258"></a>    <span class="c1"># Find best flight (first option)</span>
+<a id="__codelineno-0-259" name="__codelineno-0-259"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-260" name="__codelineno-0-260"></a>        <span class="n">best_flight</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="s2">&quot;ul[role=&#39;list&#39;]&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="s2">&quot;li&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-261" name="__codelineno-0-261"></a>        <span class="k">return</span> <span class="n">best_flight</span>
+<a id="__codelineno-0-262" name="__codelineno-0-262"></a>    <span class="k">except</span> <span class="n">PlaywrightTimeoutError</span><span class="p">:</span>
+<a id="__codelineno-0-263" name="__codelineno-0-263"></a>        <span class="k">return</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2131,7 +2131,7 @@
 
 
 <h2 id="google_flights_scraper.interactions.wait_until_stable" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">wait_until_stable</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">stable_duration</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">wait_until_stable</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">stable_duration</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2213,7 +2213,7 @@
               </div>
             </td>
             <td>
-                  <code>2</code>
+                  <code>10000</code>
             </td>
           </tr>
       </tbody>
@@ -2302,64 +2302,70 @@
 <span class="normal"><a href="#__codelineno-0-231">231</a></span>
 <span class="normal"><a href="#__codelineno-0-232">232</a></span>
 <span class="normal"><a href="#__codelineno-0-233">233</a></span>
-<span class="normal"><a href="#__codelineno-0-234">234</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_until_stable</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="n">Page</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stable_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until an element&#39;s class attribute stops changing.</span>
-<a id="__codelineno-0-179" name="__codelineno-0-179"></a>
-<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">        page (Page): Playwright Page instance</span>
-<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">        selector (str): CSS selector for the element</span>
-<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">        stable_duration (float): How long (in seconds) the class must remain unchanged</span>
-<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        timeout (int): Maximum time to wait before raising TimeoutError</span>
-<a id="__codelineno-0-185" name="__codelineno-0-185"></a>
-<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">    Raises:</span>
-<a id="__codelineno-0-187" name="__codelineno-0-187"></a><span class="sd">        TimeoutError: If element class does not stabilize within timeout</span>
-<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-189" name="__codelineno-0-189"></a>    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-190" name="__codelineno-0-190"></a>    <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-193" name="__codelineno-0-193"></a>
-<a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<a id="__codelineno-0-195" name="__codelineno-0-195"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">:</span>
-<a id="__codelineno-0-196" name="__codelineno-0-196"></a>            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Element class did not stabilize within </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-197" name="__codelineno-0-197"></a>
-<a id="__codelineno-0-198" name="__codelineno-0-198"></a>        <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="n">element</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-234">234</a></span>
+<span class="normal"><a href="#__codelineno-0-235">235</a></span>
+<span class="normal"><a href="#__codelineno-0-236">236</a></span>
+<span class="normal"><a href="#__codelineno-0-237">237</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-177" name="__codelineno-0-177"></a><span class="k">def</span><span class="w"> </span><span class="nf">wait_until_stable</span><span class="p">(</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>    <span class="n">page</span><span class="p">:</span> <span class="n">Page</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stable_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span>
+<a id="__codelineno-0-179" name="__codelineno-0-179"></a><span class="p">):</span>
+<a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Wait until an element&#39;s class attribute stops changing.</span>
+<a id="__codelineno-0-181" name="__codelineno-0-181"></a>
+<a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-183" name="__codelineno-0-183"></a><span class="sd">        page (Page): Playwright Page instance</span>
+<a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">        selector (str): CSS selector for the element</span>
+<a id="__codelineno-0-185" name="__codelineno-0-185"></a><span class="sd">        stable_duration (float): How long (in seconds) the class must remain unchanged</span>
+<a id="__codelineno-0-186" name="__codelineno-0-186"></a><span class="sd">        timeout (int): Maximum time to wait before raising TimeoutError</span>
+<a id="__codelineno-0-187" name="__codelineno-0-187"></a>
+<a id="__codelineno-0-188" name="__codelineno-0-188"></a><span class="sd">    Raises:</span>
+<a id="__codelineno-0-189" name="__codelineno-0-189"></a><span class="sd">        TimeoutError: If element class does not stabilize within timeout</span>
+<a id="__codelineno-0-190" name="__codelineno-0-190"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-191" name="__codelineno-0-191"></a>    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-192" name="__codelineno-0-192"></a>    <span class="n">timeout_seconds</span> <span class="o">=</span> <span class="n">timeout</span> <span class="o">/</span> <span class="mi">1000</span>
+<a id="__codelineno-0-193" name="__codelineno-0-193"></a>    <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-194" name="__codelineno-0-194"></a>    <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-195" name="__codelineno-0-195"></a>    <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-196" name="__codelineno-0-196"></a>
+<a id="__codelineno-0-197" name="__codelineno-0-197"></a>    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<a id="__codelineno-0-198" name="__codelineno-0-198"></a>        <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span> <span class="o">&gt;</span> <span class="n">timeout_seconds</span><span class="p">:</span>
+<a id="__codelineno-0-199" name="__codelineno-0-199"></a>            <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Element class did not stabilize within </span><span class="si">{</span><span class="n">timeout_seconds</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-200" name="__codelineno-0-200"></a>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="c1"># Wait for element to exist</span>
-<a id="__codelineno-0-202" name="__codelineno-0-202"></a>            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-203" name="__codelineno-0-203"></a>                <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-204" name="__codelineno-0-204"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-205" name="__codelineno-0-205"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-206" name="__codelineno-0-206"></a>                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
-<a id="__codelineno-0-207" name="__codelineno-0-207"></a>                <span class="k">continue</span>
-<a id="__codelineno-0-208" name="__codelineno-0-208"></a>
-<a id="__codelineno-0-209" name="__codelineno-0-209"></a>            <span class="n">current_class</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-210" name="__codelineno-0-210"></a>
-<a id="__codelineno-0-211" name="__codelineno-0-211"></a>            <span class="c1"># On first read, just store the class</span>
-<a id="__codelineno-0-212" name="__codelineno-0-212"></a>            <span class="k">if</span> <span class="n">first_read</span><span class="p">:</span>
-<a id="__codelineno-0-213" name="__codelineno-0-213"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="n">current_class</span>
-<a id="__codelineno-0-214" name="__codelineno-0-214"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-215" name="__codelineno-0-215"></a>                <span class="n">first_read</span> <span class="o">=</span> <span class="kc">False</span>
-<a id="__codelineno-0-216" name="__codelineno-0-216"></a>            <span class="k">elif</span> <span class="n">current_class</span> <span class="o">==</span> <span class="n">previous_class</span><span class="p">:</span>
-<a id="__codelineno-0-217" name="__codelineno-0-217"></a>                <span class="k">if</span> <span class="n">stable_since</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-218" name="__codelineno-0-218"></a>                    <span class="c1"># Class hasn&#39;t changed, check if stable long enough</span>
-<a id="__codelineno-0-219" name="__codelineno-0-219"></a>                    <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">stable_since</span> <span class="o">&gt;=</span> <span class="n">stable_duration</span><span class="p">:</span>
-<a id="__codelineno-0-220" name="__codelineno-0-220"></a>                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<a id="__codelineno-0-221" name="__codelineno-0-221"></a>                        <span class="k">break</span>
-<a id="__codelineno-0-222" name="__codelineno-0-222"></a>            <span class="k">else</span><span class="p">:</span>
-<a id="__codelineno-0-223" name="__codelineno-0-223"></a>                <span class="c1"># Class changed, reset the timer</span>
-<a id="__codelineno-0-224" name="__codelineno-0-224"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="n">current_class</span>
-<a id="__codelineno-0-225" name="__codelineno-0-225"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<a id="__codelineno-0-226" name="__codelineno-0-226"></a>
-<a id="__codelineno-0-227" name="__codelineno-0-227"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># Check every 100ms</span>
-<a id="__codelineno-0-228" name="__codelineno-0-228"></a>
-<a id="__codelineno-0-229" name="__codelineno-0-229"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-<a id="__codelineno-0-230" name="__codelineno-0-230"></a>            <span class="c1"># Element not found yet, keep waiting</span>
-<a id="__codelineno-0-231" name="__codelineno-0-231"></a>            <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
-<a id="__codelineno-0-232" name="__codelineno-0-232"></a>            <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-233" name="__codelineno-0-233"></a>            <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-234" name="__codelineno-0-234"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a>        <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-0-202" name="__codelineno-0-202"></a>            <span class="n">element</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">locator</span><span class="p">(</span><span class="n">selector</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-0-203" name="__codelineno-0-203"></a>
+<a id="__codelineno-0-204" name="__codelineno-0-204"></a>            <span class="c1"># Wait for element to exist</span>
+<a id="__codelineno-0-205" name="__codelineno-0-205"></a>            <span class="k">if</span> <span class="n">element</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-206" name="__codelineno-0-206"></a>                <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-207" name="__codelineno-0-207"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-208" name="__codelineno-0-208"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-209" name="__codelineno-0-209"></a>                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<a id="__codelineno-0-210" name="__codelineno-0-210"></a>                <span class="k">continue</span>
+<a id="__codelineno-0-211" name="__codelineno-0-211"></a>
+<a id="__codelineno-0-212" name="__codelineno-0-212"></a>            <span class="n">current_class</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-213" name="__codelineno-0-213"></a>
+<a id="__codelineno-0-214" name="__codelineno-0-214"></a>            <span class="c1"># On first read, just store the class</span>
+<a id="__codelineno-0-215" name="__codelineno-0-215"></a>            <span class="k">if</span> <span class="n">first_read</span><span class="p">:</span>
+<a id="__codelineno-0-216" name="__codelineno-0-216"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="n">current_class</span>
+<a id="__codelineno-0-217" name="__codelineno-0-217"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-218" name="__codelineno-0-218"></a>                <span class="n">first_read</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-0-219" name="__codelineno-0-219"></a>            <span class="k">elif</span> <span class="n">current_class</span> <span class="o">==</span> <span class="n">previous_class</span><span class="p">:</span>
+<a id="__codelineno-0-220" name="__codelineno-0-220"></a>                <span class="k">if</span> <span class="n">stable_since</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-221" name="__codelineno-0-221"></a>                    <span class="c1"># Class hasn&#39;t changed, check if stable long enough</span>
+<a id="__codelineno-0-222" name="__codelineno-0-222"></a>                    <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">stable_since</span> <span class="o">&gt;=</span> <span class="n">stable_duration</span><span class="p">:</span>
+<a id="__codelineno-0-223" name="__codelineno-0-223"></a>                        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<a id="__codelineno-0-224" name="__codelineno-0-224"></a>                        <span class="k">break</span>
+<a id="__codelineno-0-225" name="__codelineno-0-225"></a>            <span class="k">else</span><span class="p">:</span>
+<a id="__codelineno-0-226" name="__codelineno-0-226"></a>                <span class="c1"># Class changed, reset the timer</span>
+<a id="__codelineno-0-227" name="__codelineno-0-227"></a>                <span class="n">previous_class</span> <span class="o">=</span> <span class="n">current_class</span>
+<a id="__codelineno-0-228" name="__codelineno-0-228"></a>                <span class="n">stable_since</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<a id="__codelineno-0-229" name="__codelineno-0-229"></a>
+<a id="__codelineno-0-230" name="__codelineno-0-230"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>  <span class="c1"># Check every 100ms</span>
+<a id="__codelineno-0-231" name="__codelineno-0-231"></a>
+<a id="__codelineno-0-232" name="__codelineno-0-232"></a>        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-0-233" name="__codelineno-0-233"></a>            <span class="c1"># Element not found yet, keep waiting</span>
+<a id="__codelineno-0-234" name="__codelineno-0-234"></a>            <span class="n">first_read</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-0-235" name="__codelineno-0-235"></a>            <span class="n">previous_class</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-236" name="__codelineno-0-236"></a>            <span class="n">stable_since</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-237" name="__codelineno-0-237"></a>            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
