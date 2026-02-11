@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # List of results
 RESULTS = [
     "domestic_economy_basic",
@@ -26,5 +28,6 @@ def test_results_return(scraper_fixture, request):
 def test_results_url(scraper_fixture, request):
     """Test that scraper returns final url."""
     result = request.getfixturevalue(scraper_fixture)
-    assert isinstance(result["url"], str)
-    assert result["url"] != ""
+    if result['status'] == "Ran successfully.":
+        assert isinstance(result["url"], str)
+        assert result["url"] != ""

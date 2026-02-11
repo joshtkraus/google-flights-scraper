@@ -1,11 +1,12 @@
 """Data extraction and parsing functions for Google Flights scraper."""
 
+import asyncio
+import random
 import re
 import sys
-import time
 
-from playwright.sync_api import Locator, Page
-from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+from playwright.async_api import Locator, Page
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 from .interactions import wait_until_stable
 
@@ -121,12 +122,9 @@ def extract_layover_info(flight_description: str):
         r"(?: overnight)? layover in ([^.]+?)\.(?:\s+Transfer)?"
     )
 
-    # Try pattern with "at" first
     matches_at = re.findall(pattern_at, flight_description)
     matches_in = re.findall(pattern_in, flight_description)
 
-    # pattern_at returns tuples of (duration, airport) due to 2 capturing groups
-    # pattern_in returns tuples of (duration, location)
     all_matches = matches_at + matches_in
     if all_matches:
         layover_durations = [m[0].strip() for m in all_matches]
@@ -144,27 +142,18 @@ def extract_duration(flight_description: str):
     Returns:
         tuple: (duration_minutes, duration_str) or (None, None)
     """
-    # Pattern with both hours and minutes
     if m := re.search(r"Total duration (\d+) hr (\d+) min", flight_description):
         hours = int(m.group(1))
         minutes = int(m.group(2))
-        duration_minutes = hours * 60 + minutes
-        duration_str = f"{hours} hr {minutes} min"
-        return duration_minutes, duration_str
+        return hours * 60 + minutes, f"{hours} hr {minutes} min"
 
-    # Pattern with only hours (no minutes)
     if m := re.search(r"Total duration (\d+) hr", flight_description):
         hours = int(m.group(1))
-        duration_minutes = hours * 60
-        duration_str = f"{hours} hr"
-        return duration_minutes, duration_str
+        return hours * 60, f"{hours} hr"
 
-    # Pattern with only minutes (no hours)
     if m := re.search(r"Total duration (\d+) min", flight_description):
         minutes = int(m.group(1))
-        duration_minutes = minutes
-        duration_str = f"{minutes} min"
-        return duration_minutes, duration_str
+        return minutes, f"{minutes} min"
 
     return None, None
 
@@ -190,7 +179,7 @@ def extract_baggage_info(flight_description: str):
     return carry_on_bags, checked_bags
 
 
-def extract_flight_details(flight_element: Locator):
+async def extract_flight_details(flight_element: Locator):
     """Extract all flight details from a flight element.
 
     Args:
@@ -199,14 +188,12 @@ def extract_flight_details(flight_element: Locator):
     Returns:
         dict: flight_info dictionary
     """
-    # Initialize flight info structure
     flight_info = create_empty_flight_info()
 
-    # Get flight description immediately and store as string
     flight_desc_locator = flight_element.locator("div[aria-label^='From ']")
 
     try:
-        flight_description = flight_desc_locator.get_attribute("aria-label")
+        flight_description = await flight_desc_locator.get_attribute("aria-label")
     except Exception:
         return flight_info
 
@@ -245,136 +232,67 @@ def extract_flight_details(flight_element: Locator):
     return flight_info
 
 
-def _extract_attribute_with_retry(
-    page: Page,
-    selector: str,
-    attribute: str,
-    max_retries: int = 3,
-    sleep_s: float = 0.5,
-):
-    """Extract attribute from element with retry for handling dynamic content.
-
-    Args:
-        page (Page): Playwright Page instance
-        selector (str): CSS selector to locate element
-        attribute (str): Attribute name to extract
-        max_retries (int): Number of retry attempts
-        sleep_s (float): Sleep duration between retries
-
-    Returns:
-        str | None: Attribute value, or None if not found after retries
-    """
-    for attempt in range(max_retries):
-        try:
-            element = page.locator(selector)
-            element.first.wait_for(state="attached", timeout=500)
-            return element.first.get_attribute(attribute)
-
-        except PlaywrightTimeoutError:
-            if attempt == max_retries - 1:
-                return None
-            time.sleep(sleep_s)
-        except Exception as e:
-            if attempt == max_retries - 1:
-                print(f"Error extracting attribute: {e}", file=sys.stderr)
-                return None
-            time.sleep(sleep_s)
-
-    return None
-
-
-def extract_final_price(page: Page, timeout: int):
+async def extract_final_price(page: Page, timeout: int):
     """Extract the final price from the booking page.
 
     Args:
         page (Page): Playwright Page instance
-        timeout (int): Timeout for waiting operations
+        timeout (int): Timeout for waiting operations (in milliseconds)
 
     Returns:
         int: Final price in US dollars, or None if not found
     """
     # Wait for page to fully load
-    wait_until_stable(
+    await wait_until_stable(
         page,
         "div[role='progressbar']",
         stable_duration=2.0,
         timeout=timeout,
     )
 
+    await asyncio.sleep(max(0.0, 0.5 + random.uniform(-0.25, 0.25)))
+
+    await page.mouse.wheel(delta_x=0, delta_y=max(0.0, 350 + random.uniform(-100, 100)))
+
     # Target the specific price element near "Lowest total price" text
-    selector = "div:has-text('Lowest total price') + div span[aria-label*='US dollars']"
+    selector = "div:has-text('Lowest total price') div span[aria-label*='US dollars']"
 
-    # Get aria-label with retry
-    aria_label = _extract_attribute_with_retry(page, selector, "aria-label")
+    try:
+        price_element = page.locator(selector).first
+        await price_element.wait_for(state="visible", timeout=timeout)
+        aria_label = await price_element.get_attribute("aria-label")
 
-    # Check if aria_label is not None before regex
-    if aria_label and (m := re.search(r"(\d+(?:,\d{3})*) US dollars", aria_label)):
-        return int(m.group(1).replace(",", ""))
+        if aria_label and (m := re.search(r"(\d+(?:,\d{3})*) US dollars", aria_label)):
+            return int(m.group(1).replace(",", ""))
 
-    return None
+        return None
 
-
-def _extract_text_with_retry(
-    page: Page,
-    selector: str,
-    max_retries: int = 3,
-    sleep_s: float = 0.5,
-):
-    """Extract text from element with retry for handling dynamic content.
-
-    Args:
-        page (Page): Playwright Page instance
-        selector (str): CSS selector to locate element
-        max_retries (int): Number of retry attempts
-        sleep_s (float): Sleep duration between retries
-
-    Returns:
-        str | None: Element text, or None if not found after retries
-    """
-    for attempt in range(max_retries):
-        try:
-            element = page.locator(selector)
-            element.first.wait_for(state="attached", timeout=500)
-            return element.first.inner_text()
-
-        except PlaywrightTimeoutError:
-            if attempt == max_retries - 1:
-                return None
-            time.sleep(sleep_s)
-        except Exception as e:
-            if attempt == max_retries - 1:
-                print(f"Error extracting text: {e}", file=sys.stderr)
-                return None
-            time.sleep(sleep_s)
-
-    return None
+    except PlaywrightTimeoutError:
+        print("Price element not found", file=sys.stderr)
+        return None
 
 
-def extract_price_classification_text(page: Page, timeout: int):
+async def extract_price_classification_text(page: Page, timeout: int):
     """Find and extract the price classification text from the page.
 
     Args:
         page (Page): Playwright Page instance
-        timeout (int): Timeout for waiting operations
+        timeout (int): Timeout for waiting operations (in milliseconds)
 
     Returns:
         str: Text containing price classification, or None if not found
     """
-    # Wait for page to load
-    wait_until_stable(
-        page,
-        "div[role='progressbar']",
-        stable_duration=2.0,
-        timeout=timeout,
-    )
-
-    # Look for div containing "low", "high", or "typical" in Price insights section
     selector = (
         "h3:has-text('Price insights') ~ * "
         "div:has-text(' is '):has-text(' for '):has(span:text-matches('low|high|typical', 'i'))"
     )
 
-    return _extract_text_with_retry(page, selector)
+    try:
+        element = page.locator(selector).first
+        await element.wait_for(state="visible", timeout=timeout)
+        return await element.inner_text()
+    except PlaywrightTimeoutError:
+        return None
 
 
 def parse_price_classification(text: str):
@@ -416,35 +334,31 @@ def parse_price_difference(text: str):
     text_lower = text.lower()
 
     if "cheaper" in text_lower:
-        # Extract dollar amount
         if m := re.search(r"\$(\d+(?:,\d{3})*)\s+cheaper", text):
             return int(m.group(1).replace(",", ""))
         return 0
     elif "low" in text_lower or "high" in text_lower or "typical" in text_lower:
-        # For "high" or "typical", amount is 0
         return 0
 
     return None
 
 
-def extract_price_relativity(page: Page, timeout: int):
+async def extract_price_relativity(page: Page, timeout: int):
     """Extract price relativity information from final page.
 
     Args:
         page (Page): Playwright Page instance
-        timeout (int): Timeout for waiting operations
+        timeout (int): Timeout for waiting operations (in milliseconds)
 
     Returns:
         tuple: (classification, amount) where classification is one of
                'typical', 'high', 'low', or None; amount is integer or None
     """
-    # Extract the text from the page
-    text = extract_price_classification_text(page, timeout)
+    text = await extract_price_classification_text(page, timeout)
 
     if not text:
         return None, None
 
-    # Parse classification and amount
     classification = parse_price_classification(text)
     amount = parse_price_difference(text)
 

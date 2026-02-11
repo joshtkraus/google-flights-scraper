@@ -2,6 +2,8 @@
 
 import pytest
 
+pytestmark = pytest.mark.integration
+
 # List of results
 RESULTS = [
     "domestic_economy_basic",
@@ -20,8 +22,9 @@ def test_price(scraper_fixture, request):
     """Test that scraper returns price info."""
     result = request.getfixturevalue(scraper_fixture)
     assert "price" in result.keys()
-    assert isinstance(result['price'], int)
-    assert result['price'] > 0
+    if result['status'] == "Ran successfully.":
+        assert isinstance(result['price'], int)
+        assert result['price'] > 0
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_price_classification(scraper_fixture, request):

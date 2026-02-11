@@ -1,5 +1,6 @@
 """Unit tests for validator functions."""
 
+from datetime import datetime, timedelta
 import pytest
 import pandas as pd
 from pathlib import Path
@@ -11,12 +12,19 @@ from google_flights_scraper.validators import (
     validate_seat_class,
 )
 
+pytestmark = pytest.mark.unit
+
+# Get today's date
+today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 @pytest.fixture
 def airport_df():
     """Load actual airport codes DataFrame for testing."""
     # From tests/ directory, go up one level to project root, then into data/
-    test_dir = Path(__file__).parent
+    test_dir = Path(__file__).parent.parent
     csv_path = test_dir.parent / "data" / "airport_codes.csv"
     return pd.read_csv(csv_path)
 
@@ -24,31 +32,37 @@ def airport_df():
 # Date validation tests
 def test_valid_dates():
     """Test that valid dates pass validation."""
-    validate_dates("03/15/2026", "03/22/2026")  # Should not raise
+    validate_dates(start, end)  # Should not raise
 
 
 def test_end_date_before_start_date():
     """Test that end date before start date raises ValueError."""
     with pytest.raises(ValueError):
-        validate_dates("03/22/2026", "03/15/2026")
+        validate_dates(end, start)
 
 
 def test_same_dates():
     """Test that same start and end dates raise ValueError."""
     with pytest.raises(ValueError):
-        validate_dates("03/15/2026", "03/15/2026")
+        validate_dates(start, start)
 
 
 def test_invalid_date_format_wrong_separator():
     """Test that wrong date separator raises ValueError."""
+    # Create Dates
+    start = (today + timedelta(weeks=4)).strftime("%m-%d-%Y")
+    end = (today + timedelta(weeks=5)).strftime("%m-%d-%Y")
     with pytest.raises(ValueError):
-        validate_dates("03-15-2026", "03-22-2026")
+        validate_dates(start, end)
 
 
 def test_invalid_date_format_wrong_order():
     """Test that wrong date order (YYYY/MM/DD) raises ValueError."""
+    # Create Dates
+    start = (today + timedelta(weeks=4)).strftime("%Y/%/m/%d")
+    end = (today + timedelta(weeks=5)).strftime("%Y/%m/%d")
     with pytest.raises(ValueError):
-        validate_dates("2026/03/15", "2026/03/22")
+        validate_dates(start, end)
 
 
 def test_invalid_month():

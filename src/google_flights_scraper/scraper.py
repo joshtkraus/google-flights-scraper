@@ -1,12 +1,13 @@
 """Main scraper orchestration class."""
 
+import asyncio
 import json
+import random
 import sys
-import time
 from pathlib import Path
 
 import pandas as pd
-from playwright.sync_api import Page
+from playwright.async_api import Page
 
 from .config_browser import DEFAULT_TIMEOUT, setup_browser
 from .interactions import (
@@ -31,6 +32,12 @@ from .validators import (
 )
 
 
+class CaptchaDetectedError(Exception):
+    """Raised when a CAPTCHA or bot-detection page is detected."""
+
+    pass
+
+
 class GoogleFlightsScraper:
     """Web scraper for Google Flights using Playwright."""
 
@@ -53,7 +60,7 @@ class GoogleFlightsScraper:
         """Get page instance, raising error if not initialized.
 
         Raises:
-            RuntimeError: If brower now initialized.
+            RuntimeError: If browser not initialized.
         """
         if self.page is None:
             raise RuntimeError("Browser not initialized. Call scrape_flight first.")
@@ -129,29 +136,55 @@ class GoogleFlightsScraper:
         Returns:
             bool: True if flight is domestic US
         """
-        # Validate airport codes
         for code in [departure_code, arrival_code]:
             validate_airport_code(code, self.airport_codes_df)
 
-        # Determine if domestic US flight
         is_domestic_us = is_domestic_us_flight(
             departure_country,
             arrival_country,
             self.airport_codes_df,
         )
 
-        # Validate seat class
         validate_seat_class(seat_class, is_domestic_us)
-
-        # Validate dates
         validate_dates(start_date, end_date)
-
-        # Validate export params
         validate_export_params(export_path)
 
         return is_domestic_us
 
-    def _fill_search_form(
+    async def _check_for_captcha(self):
+        """Check the current page for CAPTCHA or bot-detection signals.
+
+        Checks three signals:
+          1. URL matches known Google bot-detection patterns (/sorry/)
+          2. Page title contains 'unusual traffic'
+          3. reCAPTCHA iframe is present in the DOM
+
+        Raises:
+            CaptchaDetectedError: When Captcha is detected.
+        """
+        # 1. URL pattern — Google redirects to /sorry/index when blocking bots
+        url = self._page.url
+        if "/sorry/" in url or "google.com/sorry" in url:
+            raise CaptchaDetectedError(f"CAPTCHA detected: bot-detection URL pattern ({url})")
+
+        # 2. Page title
+        title = await self._page.title()
+        if "unusual traffic" in title.lower():
+            raise CaptchaDetectedError(
+                f"CAPTCHA detected: page title indicates unusual traffic ('{title}')"
+            )
+
+        # 3. reCAPTCHA iframe
+        recaptcha = self._page.locator(
+            "iframe[src*='google.com/recaptcha'], "
+            "iframe[title*='recaptcha' i], "
+            "div#recaptcha, "
+            "div.g-recaptcha"
+        )
+        if await recaptcha.count() > 0:
+            raise CaptchaDetectedError("CAPTCHA detected: reCAPTCHA widget found on page")
+
+    async def _fill_search_form(
         self,
         departure_code: str,
         arrival_code: str,
@@ -170,19 +203,12 @@ class GoogleFlightsScraper:
             seat_class (str): Seat class string
             is_domestic_us (bool): Whether flight is domestic US
         """
-        # Enter airports
-        enter_airports(self._page, departure_code, arrival_code)
+        await enter_airports(self._page, departure_code, arrival_code)
+        await enter_dates(self._page, start_date, end_date)
+        await select_seat_class(self._page, seat_class, is_domestic_us)
+        await press_search_button(self._page)
 
-        # Enter dates
-        enter_dates(self._page, start_date, end_date)
-
-        # Select seat class
-        select_seat_class(self._page, seat_class, is_domestic_us)
-
-        # Click search button
-        press_search_button(self._page)
-
-    def _find_flight_with_retry(
+    async def _find_flight_with_retry(
         self,
         result: dict,
         key: str,
@@ -202,25 +228,24 @@ class GoogleFlightsScraper:
         """
         for attempt in range(max_retries):
             try:
-                flight = find_and_select_best_flight(self._page, timeout=self.wait_time)
+                flight = await find_and_select_best_flight(self._page, timeout=self.wait_time)
 
                 if flight is None:
                     return f"No {key.replace('_', ' ')} found."
 
-                result[key] = extract_flight_details(flight)
+                result[key] = await extract_flight_details(flight)
 
-                # Click the flight
-                flight.click()
+                await flight.click()
                 return None
 
             except Exception as e:
                 if attempt == max_retries - 1:
                     return f"Error finding {key}: {str(e)}"
-                time.sleep(sleep_s)
+                await asyncio.sleep(sleep_s)
 
         return f"Failed to find {key} after {max_retries} retries."
 
-    def _select_best_flights(self, result: dict):
+    async def _select_best_flights(self, result: dict):
         """Select the best departure and return flights and extract details.
 
         Args:
@@ -229,20 +254,28 @@ class GoogleFlightsScraper:
         Returns:
             tuple: (updated result dictionary, success status message)
         """
-        # Select Departure
-        err = self._find_flight_with_retry(result, key="departure_flight")
+        await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
+        await self._page.mouse.wheel(delta_x=0, delta_y=max(0.0, 400 + random.uniform(-100, 100)))
+
+        err = await self._find_flight_with_retry(result, key="departure_flight")
         if err:
             return result, err
 
-        # Select Return
-        err = self._find_flight_with_retry(result, key="return_flight")
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
+
+        await self._page.mouse.wheel(delta_x=0, delta_y=max(0.0, 200 + random.uniform(-50, 50)))
+
+        err = await self._find_flight_with_retry(result, key="return_flight")
         if err:
             return result, err
 
-        # Extract price from final booking page
-        result["price"] = extract_final_price(self._page, timeout=self.wait_time)
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
 
-        # Capture the final page URL
+        result["price"] = await extract_final_price(self._page, timeout=self.wait_time * 2)
+
+        if result["price"] is None:
+            return result, "Error: Price not found"
+
         result["url"] = self._page.url
 
         return result, "Ran successfully."
@@ -259,8 +292,7 @@ class GoogleFlightsScraper:
         """
         if price_difference is not None and price is not None:
             return round(float(price_difference / (price + price_difference)), 4)
-        else:
-            return None
+        return None
 
     def _export_data(self, result: dict, export_path: str):
         """Export dict to file based on extension.
@@ -270,14 +302,13 @@ class GoogleFlightsScraper:
             export_path (str): Path to export file to
         """
         if export_path.endswith(".json"):
-            json_output = json.dumps(result, indent=2)
             with open(export_path, "w") as f:
-                f.write(json_output)
+                f.write(json.dumps(result, indent=2))
         elif export_path.endswith(".csv"):
             df = pd.json_normalize(result, sep="_")
             df.to_csv(export_path, index=False)
 
-    def scrape_flight(
+    async def scrape_flight(
         self,
         departure_code: str,
         departure_country: str,
@@ -302,8 +333,10 @@ class GoogleFlightsScraper:
 
         Returns:
             dict: Complete flight information as dictionary
+
+        Raises:
+            CaptchaDetectedError: When Captcha is detected.
         """
-        # Initialize result structure
         result = self._create_result_structure(
             departure_code,
             departure_country,
@@ -315,7 +348,6 @@ class GoogleFlightsScraper:
         )
 
         try:
-            # Validate inputs
             is_domestic_us = self._validate_inputs(
                 departure_code,
                 departure_country,
@@ -327,14 +359,14 @@ class GoogleFlightsScraper:
                 export_path,
             )
 
-            # Setup browser
-            self.playwright, self.browser, self.context, self.page = setup_browser(headless=True)
+            self.playwright, self.browser, self.context, self.page = await setup_browser()
 
-            # Navigate to Google Flights
-            self.page.goto("https://www.google.com/travel/flights")
+            await self.page.goto("https://www.google.com/travel/flights")
+            await self._check_for_captcha()
 
-            # Fill search form
-            self._fill_search_form(
+            await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
+
+            await self._fill_search_form(
                 departure_code,
                 arrival_code,
                 start_date,
@@ -342,39 +374,41 @@ class GoogleFlightsScraper:
                 seat_class,
                 is_domestic_us,
             )
+            await self._check_for_captcha()
 
-            # Select best flights and extract details
-            result, status = self._select_best_flights(result)
+            result, status = await self._select_best_flights(result)
 
-            # Extract price difference
             if status == "Ran successfully.":
-                (result["price_classification"], result["price_difference"]) = (
-                    extract_price_relativity(self.page, timeout=self.wait_time)
-                )
+                (
+                    result["price_classification"],
+                    result["price_difference"],
+                ) = await extract_price_relativity(self.page, timeout=2000)
 
-            # Calculate price relativity
             result["price_relativity"] = self._calc_price_rel(
                 result["price"], result["price_difference"]
             )
 
+            await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
+
+        except CaptchaDetectedError:
+            print("CAPTCHA detected during scrape.", file=sys.stderr)
+            status = "Error: CAPTCHA detected"
+            raise  # re-raise after cleanup so batch runner can catch and cancel
         except Exception as e:
             print(f"Error scraping flight: {e}", file=sys.stderr)
             status = f"Error: {str(e)}"
         finally:
-            # Close browser and cleanup
             if self.page:
-                self.page.close()
+                await self.page.close()
             if self.context:
-                self.context.close()
+                await self.context.close()
             if self.browser:
-                self.browser.close()
+                await self.browser.close()
             if self.playwright:
-                self.playwright.stop()
+                await self.playwright.stop()
 
-        # Update status
         result["status"] = status
 
-        # Export
         if export_path:
             self._export_data(result, export_path)
 
