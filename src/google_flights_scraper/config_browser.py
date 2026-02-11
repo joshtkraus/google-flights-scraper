@@ -2,7 +2,12 @@
 
 import random
 
+from fake_useragent import UserAgent
 from playwright.async_api import Browser, BrowserContext, Page, Playwright, async_playwright
+from playwright_stealth import Stealth
+
+# Initialise UA database
+_ua = UserAgent(browsers=["Chrome"])
 
 # Valid seat class options
 VALID_CLASSES_DOMESTIC_US = [
@@ -37,44 +42,61 @@ SEAT_CLASS_OPTION_MAPPING = {
     },
 }
 
+# Realistic viewport + device scale factor pairs.
+VIEWPORT_PROFILES = [
+    # 1080p monitors
+    {"width": 1920, "height": 1080, "device_scale_factor": 1.0},
+    {"width": 1920, "height": 1080, "device_scale_factor": 1.0},
+    # 1440p / QHD monitors
+    {"width": 2560, "height": 1440, "device_scale_factor": 2.0},
+    {"width": 2560, "height": 1440, "device_scale_factor": 2.0},
+    # MacBook Pro retina
+    {"width": 1440, "height": 900, "device_scale_factor": 2.0},
+    # MacBook Air / older laptops
+    {"width": 1280, "height": 800, "device_scale_factor": 2.0},
+    # Common budget/older laptop resolution
+    {"width": 1366, "height": 768, "device_scale_factor": 1.0},
+    # 4K monitors
+    {"width": 3840, "height": 2160, "device_scale_factor": 2.0},
+]
+
+# US timezones
+US_TIMEZONES = [
+    "America/New_York",
+    "America/Chicago",
+    "America/Denver",
+    "America/Los_Angeles",
+]
+
 # Default timeout (ms)
 DEFAULT_TIMEOUT = 10000  # 10 seconds
 
-# Realistic Chrome user agents across Windows, macOS, Linux
-USER_AGENTS = [
-    # Chrome on Windows
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 11.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    # Chrome on macOS
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7_1) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_6_3) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-    # Chrome on Linux
-    "Mozilla/5.0 (X11; Linux x86_64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-]
+
+def get_random_viewport_profile() -> dict:
+    """Return a random realistic viewport profile.
+
+    Returns:
+        dict: A dict with width, height, and device_scale_factor keys
+    """
+    return random.choice(VIEWPORT_PROFILES).copy()
+
+
+def get_random_timezone() -> str:
+    """Return a random US timezone weighted by population.
+
+    Returns:
+        str: A timezone string compatible with Playwright's timezone_id
+    """
+    return random.choice(US_TIMEZONES)
 
 
 def get_random_user_agent() -> str:
-    """Return a random user agent string from the pool.
+    """Return a random Chrome user agent string from the fake-useragent database.
 
     Returns:
-        str: A randomly selected user agent string
+        str: A randomly selected Chrome user agent string
     """
-    return random.choice(USER_AGENTS)
+    return str(_ua.random)
 
 
 async def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
@@ -86,7 +108,7 @@ async def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
     playwright = await async_playwright().start()
 
     browser = await playwright.chromium.launch(
-        headless=True,
+        headless=False,
         args=[
             "--no-sandbox",
             "--disable-dev-shm-usage",
@@ -96,9 +118,17 @@ async def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
         ],
     )
 
+    viewport_profile = get_random_viewport_profile()
+
     context = await browser.new_context(
-        no_viewport=True,
+        viewport={
+            "width": viewport_profile["width"],
+            "height": viewport_profile["height"],
+        },
+        device_scale_factor=viewport_profile["device_scale_factor"],
         user_agent=get_random_user_agent(),
+        locale="en-US",
+        timezone_id=get_random_timezone(),
     )
 
     # Block images, fonts, media to speed up
@@ -110,6 +140,7 @@ async def setup_browser() -> tuple[Playwright, Browser, BrowserContext, Page]:
     await context.route("**/googletagmanager.com/**", lambda route: route.abort())
 
     page = await context.new_page()
+    await Stealth().apply_stealth_async(page)
     page.set_default_timeout(DEFAULT_TIMEOUT)
 
     return playwright, browser, context, page

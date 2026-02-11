@@ -6,7 +6,7 @@ import sys
 
 import pandas as pd
 
-from .scraper import GoogleFlightsScraper
+from .scraper import CaptchaDetectedError, GoogleFlightsScraper
 
 # Default per-task timeout (seconds) — covers full browser lifecycle
 DEFAULT_TASK_TIMEOUT = 120
@@ -48,6 +48,19 @@ async def scrape_multiple(
     """
     # Validate Inputs
     await _validate_inputs(arrival_codes, arrival_countries, start_dates, end_dates, seat_classes)
+
+    # Shuffle Lists (for randomness in search)
+    combined = list(
+        zip(arrival_codes, arrival_countries, start_dates, end_dates, seat_classes, strict=True)
+    )
+    random.shuffle(combined)
+    (
+        arrival_codes,
+        arrival_countries,
+        start_dates,
+        end_dates,
+        seat_classes,
+    ) = map(list, zip(*combined, strict=True))
 
     tasks = [
         {
@@ -134,10 +147,16 @@ async def _run_tasks(
     Returns:
         list[dict]: Flattened results for each task
     """
+    # Shared cancellation flag — set by any task that detects a CAPTCHA.
+    # All queued tasks check this before starting and bail out early.
+    captcha_event = asyncio.Event()
+
     if n_jobs == 1:
-        return await _run_sequential(tasks, delay_seconds, delay_jitter, task_timeout)
+        return await _run_sequential(
+            tasks, delay_seconds, delay_jitter, task_timeout, captcha_event
+        )
     else:
-        return await _run_concurrent(tasks, n_jobs, task_timeout)
+        return await _run_concurrent(tasks, n_jobs, task_timeout, captcha_event)
 
 
 async def _run_sequential(
@@ -145,6 +164,7 @@ async def _run_sequential(
     delay_seconds: float,
     delay_jitter: float,
     task_timeout: int,
+    captcha_event: asyncio.Event,
 ):
     """Run tasks one at a time with a randomized delay between each.
 
@@ -155,6 +175,7 @@ async def _run_sequential(
                               uniform in [delay_seconds - jitter, delay_seconds + jitter],
                               clamped to a minimum of 0.
         task_timeout (int): Max seconds per task before cancelling
+        captcha_event (asyncio.Event): Cancellation flag set on CAPTCHA detection
 
     Returns:
         list[dict]: Flattened results
@@ -163,10 +184,18 @@ async def _run_sequential(
     total = len(tasks)
 
     for i, task in enumerate(tasks, 1):
-        result = await _scrape_task_with_timeout(task, task_timeout)
+        if captcha_event.is_set():
+            print(
+                f"  Skipping remaining {total - i + 1} task(s): CAPTCHA was detected.",
+                file=sys.stderr,
+            )
+            results.append(_captcha_cancelled_result(task))
+            continue
+
+        result = await _scrape_task_with_timeout(task, task_timeout, captcha_event)
         results.append(result)
 
-        if i < total and delay_seconds > 0:
+        if i < total and delay_seconds > 0 and not captcha_event.is_set():
             jitter = random.uniform(-delay_jitter, delay_jitter)
             actual_delay = max(0.0, delay_seconds + jitter)
             await asyncio.sleep(actual_delay)
@@ -174,7 +203,9 @@ async def _run_sequential(
     return results
 
 
-async def _run_concurrent(tasks: list[dict], n_jobs: int, task_timeout: int):
+async def _run_concurrent(
+    tasks: list[dict], n_jobs: int, task_timeout: int, captcha_event: asyncio.Event
+):
     """Run tasks concurrently up to n_jobs at a time, with per-task jitter on start.
 
     Each task sleeps a small random duration before acquiring the semaphore to
@@ -184,6 +215,7 @@ async def _run_concurrent(tasks: list[dict], n_jobs: int, task_timeout: int):
         tasks (list[dict]): List of task parameter dicts
         n_jobs (int): Maximum number of concurrent scrapes
         task_timeout (int): Max seconds per task before cancelling
+        captcha_event (asyncio.Event): Cancellation flag set on CAPTCHA detection
 
     Returns:
         list[dict]: Flattened results (in original task order)
@@ -194,29 +226,55 @@ async def _run_concurrent(tasks: list[dict], n_jobs: int, task_timeout: int):
         # Stagger start times across [0, 2s] before competing for semaphore
         await asyncio.sleep(random.uniform(0, 2.0))
         async with semaphore:
-            return await _scrape_task_with_timeout(task, task_timeout)
+            return await _scrape_task_with_timeout(task, task_timeout, captcha_event)
 
     return await asyncio.gather(*[scrape_with_jitter_and_semaphore(task) for task in tasks])
 
 
-async def _scrape_task_with_timeout(task: dict, task_timeout: int):
+async def _scrape_task_with_timeout(
+    task: dict,
+    task_timeout: int,
+    captcha_event: asyncio.Event,
+):
     """Wrap _scrape_task with a hard per-task timeout.
 
     If the task exceeds task_timeout seconds, it is cancelled and returns
     an error result rather than blocking the semaphore slot indefinitely.
+    If a CaptchaDetectedError is raised, the shared captcha_event is set
+    to signal all other queued tasks to cancel.
 
     Args:
         task (dict): Task parameters
         task_timeout (int): Max seconds to allow before cancelling
+        captcha_event (asyncio.Event): Shared flag set on CAPTCHA detection
 
     Returns:
-        dict: Flattened result dict, with error status if timed out
+        dict: Flattened result dict, with error status if timed out or CAPTCHA hit
     """
-    # Copy so pop() in _scrape_task doesn't mutate the original
     task_copy = task.copy()
 
     try:
         return await asyncio.wait_for(_scrape_task(task_copy), timeout=task_timeout)
+    except CaptchaDetectedError:
+        captcha_event.set()
+        print(
+            f"  CAPTCHA detected for "
+            f"{task.get('departure_code')} → {task.get('arrival_code')} "
+            f"({task.get('start_date')} - {task.get('end_date')}). "
+            f"Cancelling queued tasks.",
+            file=sys.stderr,
+        )
+        return {
+            "departure_airport": task.get("departure_code"),
+            "departure_country": task.get("departure_country"),
+            "arrival_airport": task.get("arrival_code"),
+            "arrival_country": task.get("arrival_country"),
+            "departure_date": task.get("start_date"),
+            "return_date": task.get("end_date"),
+            "seat_class": task.get("seat_class"),
+            "status": "Error: CAPTCHA detected",
+            "price": None,
+        }
     except asyncio.TimeoutError:
         print(
             f"  Task timed out after {task_timeout}s: "
@@ -237,6 +295,28 @@ async def _scrape_task_with_timeout(task: dict, task_timeout: int):
         }
 
 
+def _captcha_cancelled_result(task: dict) -> dict:
+    """Build a result dict for a task cancelled due to upstream CAPTCHA detection.
+
+    Args:
+        task (dict): Task parameters
+
+    Returns:
+        dict: Result dict with cancellation status
+    """
+    return {
+        "departure_airport": task.get("departure_code"),
+        "departure_country": task.get("departure_country"),
+        "arrival_airport": task.get("arrival_code"),
+        "arrival_country": task.get("arrival_country"),
+        "departure_date": task.get("start_date"),
+        "return_date": task.get("end_date"),
+        "seat_class": task.get("seat_class"),
+        "status": "Cancelled: CAPTCHA detected in earlier task",
+        "price": None,
+    }
+
+
 async def _scrape_task(task: dict):
     """Execute a single scrape task and return flattened result.
 
@@ -245,6 +325,9 @@ async def _scrape_task(task: dict):
 
     Returns:
         dict: Flattened result dict
+
+    Raises:
+        CaptchaDetectedError: When Captcha is detected.
     """
     trip_length = task.pop("trip_length", None)
 
@@ -252,6 +335,8 @@ async def _scrape_task(task: dict):
         scraper = GoogleFlightsScraper()
         result = await scraper.scrape_flight(**task)
         flat_result = _flatten_result(result)
+    except CaptchaDetectedError:
+        raise  # propagate up to _scrape_task_with_timeout for centralised handling
     except Exception as e:
         print(f"  Error: {e}", file=sys.stderr)
         flat_result = {

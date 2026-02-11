@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -29,6 +30,12 @@ from .validators import (
     validate_export_params,
     validate_seat_class,
 )
+
+
+class CaptchaDetectedError(Exception):
+    """Raised when a CAPTCHA or bot-detection page is detected."""
+
+    pass
 
 
 class GoogleFlightsScraper:
@@ -144,6 +151,39 @@ class GoogleFlightsScraper:
 
         return is_domestic_us
 
+    async def _check_for_captcha(self):
+        """Check the current page for CAPTCHA or bot-detection signals.
+
+        Checks three signals:
+          1. URL matches known Google bot-detection patterns (/sorry/)
+          2. Page title contains 'unusual traffic'
+          3. reCAPTCHA iframe is present in the DOM
+
+        Raises:
+            CaptchaDetectedError: When Captcha is detected.
+        """
+        # 1. URL pattern — Google redirects to /sorry/index when blocking bots
+        url = self._page.url
+        if "/sorry/" in url or "google.com/sorry" in url:
+            raise CaptchaDetectedError(f"CAPTCHA detected: bot-detection URL pattern ({url})")
+
+        # 2. Page title
+        title = await self._page.title()
+        if "unusual traffic" in title.lower():
+            raise CaptchaDetectedError(
+                f"CAPTCHA detected: page title indicates unusual traffic ('{title}')"
+            )
+
+        # 3. reCAPTCHA iframe
+        recaptcha = self._page.locator(
+            "iframe[src*='google.com/recaptcha'], "
+            "iframe[title*='recaptcha' i], "
+            "div#recaptcha, "
+            "div.g-recaptcha"
+        )
+        if await recaptcha.count() > 0:
+            raise CaptchaDetectedError("CAPTCHA detected: reCAPTCHA widget found on page")
+
     async def _fill_search_form(
         self,
         departure_code: str,
@@ -214,15 +254,22 @@ class GoogleFlightsScraper:
         Returns:
             tuple: (updated result dictionary, success status message)
         """
+        await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
+        await self._page.mouse.wheel(delta_x=0, delta_y=max(0.0, 400 + random.uniform(-100, 100)))
+
         err = await self._find_flight_with_retry(result, key="departure_flight")
         if err:
             return result, err
+
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
+
+        await self._page.mouse.wheel(delta_x=0, delta_y=max(0.0, 200 + random.uniform(-50, 50)))
 
         err = await self._find_flight_with_retry(result, key="return_flight")
         if err:
             return result, err
 
-        await asyncio.sleep(1)
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
 
         result["price"] = await extract_final_price(self._page, timeout=self.wait_time * 2)
 
@@ -286,6 +333,9 @@ class GoogleFlightsScraper:
 
         Returns:
             dict: Complete flight information as dictionary
+
+        Raises:
+            CaptchaDetectedError: When Captcha is detected.
         """
         result = self._create_result_structure(
             departure_code,
@@ -312,6 +362,9 @@ class GoogleFlightsScraper:
             self.playwright, self.browser, self.context, self.page = await setup_browser()
 
             await self.page.goto("https://www.google.com/travel/flights")
+            await self._check_for_captcha()
+
+            await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
 
             await self._fill_search_form(
                 departure_code,
@@ -321,6 +374,7 @@ class GoogleFlightsScraper:
                 seat_class,
                 is_domestic_us,
             )
+            await self._check_for_captcha()
 
             result, status = await self._select_best_flights(result)
 
@@ -334,6 +388,12 @@ class GoogleFlightsScraper:
                 result["price"], result["price_difference"]
             )
 
+            await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
+
+        except CaptchaDetectedError:
+            print("CAPTCHA detected during scrape.", file=sys.stderr)
+            status = "Error: CAPTCHA detected"
+            raise  # re-raise after cleanup so batch runner can catch and cancel
         except Exception as e:
             print(f"Error scraping flight: {e}", file=sys.stderr)
             status = f"Error: {str(e)}"

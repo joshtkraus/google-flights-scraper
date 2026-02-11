@@ -1,6 +1,7 @@
 """Page interaction functions for Google Flights scraper."""
 
 import asyncio
+import random
 
 from playwright.async_api import Page
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
@@ -22,7 +23,7 @@ async def enter_departure_airport(page: Page, airport_code: str):
         from_input = page.locator("input[aria-label='Where from?']")
         await from_input.wait_for(state="visible")
         await from_input.click()
-        await asyncio.sleep(1)
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
 
         from_popup = page.locator("input[aria-label*='Where else?']").nth(1)
         await from_popup.wait_for(state="visible")
@@ -68,7 +69,9 @@ async def enter_airports(page: Page, airport_code_from: str, airport_code_to: st
         airport_code_to (str): IATA code for arrival airport
     """
     await enter_departure_airport(page, airport_code_from)
+    await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
     await enter_arrival_airport(page, airport_code_to)
+    await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
 
 
 async def enter_departure_date(page: Page, date_from: str):
@@ -85,7 +88,7 @@ async def enter_departure_date(page: Page, date_from: str):
         departure_input = page.locator("input[aria-label='Departure']").first
         await departure_input.wait_for(state="visible")
         await departure_input.click()
-        await asyncio.sleep(1)
+        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
 
         departure_popup = page.locator("input[aria-label='Departure']").nth(1)
         await departure_popup.wait_for(state="visible")
@@ -108,7 +111,9 @@ async def enter_return_date(page: Page, date_to: str):
         return_popup = page.locator("input[aria-label='Return']").nth(1)
         await return_popup.wait_for(state="visible")
         await return_popup.fill(date_to)
+        await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
         await return_popup.press("Enter")
+        await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
         await return_popup.press("Enter")
     except PlaywrightTimeoutError as e:
         raise Exception("Error entering return date:") from e
@@ -123,7 +128,9 @@ async def enter_dates(page: Page, date_from: str, date_to: str):
         date_to (str): Return date in MM/DD/YYYY format
     """
     await enter_departure_date(page, date_from)
+    await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
     await enter_return_date(page, date_to)
+    await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
 
 
 async def select_seat_class(page: Page, seat_class: str, is_domestic_us: bool):
@@ -143,6 +150,7 @@ async def select_seat_class(page: Page, seat_class: str, is_domestic_us: bool):
         )
         await class_dropdown.wait_for(state="visible")
         await class_dropdown.click()
+        await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
 
         # Get all options
         listbox = page.locator("ul[role='listbox']").nth(1)
@@ -153,6 +161,7 @@ async def select_seat_class(page: Page, seat_class: str, is_domestic_us: bool):
         option_index = SEAT_CLASS_OPTION_MAPPING[is_domestic_us][seat_class.lower()]
         await class_options.nth(option_index).wait_for(state="visible")
         await class_options.nth(option_index).click()
+        await asyncio.sleep(max(0.0, 0.75 + random.uniform(-0.25, 0.25)))
     except PlaywrightTimeoutError as e:
         raise Exception("Error selecting seat class:") from e
 
@@ -221,7 +230,7 @@ async def wait_until_stable(
             elif current_class == previous_class:
                 if stable_since is not None:
                     if time.time() - stable_since >= stable_duration:
-                        await asyncio.sleep(1)
+                        await asyncio.sleep(max(0.0, 1.5 + random.uniform(-0.5, 0.5)))
                         break
             else:
                 # Class changed, reset the timer

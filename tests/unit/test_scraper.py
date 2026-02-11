@@ -111,10 +111,13 @@ class TestCleanupLogic:
         mock_browser.close = AsyncMock()
         mock_context.close = AsyncMock()
         mock_page.close = AsyncMock()
+        mock_page.goto = AsyncMock()
 
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
+             patch.object(scraper, '_check_for_captcha', new_callable=AsyncMock), \
+             patch('google_flights_scraper.scraper.asyncio.sleep', new_callable=AsyncMock), \
              patch.object(scraper, '_fill_search_form', new_callable=AsyncMock) as mock_fill:
 
             mock_fill.side_effect = Exception("Form error")
@@ -150,10 +153,13 @@ class TestConditionalLogic:
         mock_context.close = AsyncMock()
         mock_page = MagicMock()
         mock_page.close = AsyncMock()
+        mock_page.goto = AsyncMock()
 
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
+             patch.object(scraper, '_check_for_captcha', new_callable=AsyncMock), \
+             patch('google_flights_scraper.scraper.asyncio.sleep', new_callable=AsyncMock), \
              patch.object(scraper, '_fill_search_form', new_callable=AsyncMock), \
              patch.object(scraper, '_select_best_flights', new_callable=AsyncMock) as mock_select, \
              patch('google_flights_scraper.scraper.extract_price_relativity', new_callable=AsyncMock) as mock_extract:
@@ -182,10 +188,13 @@ class TestConditionalLogic:
         mock_context.close = AsyncMock()
         mock_page = MagicMock()
         mock_page.close = AsyncMock()
+        mock_page.goto = AsyncMock()
 
         mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
 
         with patch.object(scraper, '_validate_inputs'), \
+             patch.object(scraper, '_check_for_captcha', new_callable=AsyncMock), \
+             patch('google_flights_scraper.scraper.asyncio.sleep', new_callable=AsyncMock), \
              patch.object(scraper, '_fill_search_form', new_callable=AsyncMock), \
              patch.object(scraper, '_select_best_flights', new_callable=AsyncMock) as mock_select, \
              patch.object(scraper, '_export_data') as mock_export:
@@ -199,3 +208,147 @@ class TestConditionalLogic:
             )
 
             mock_export.assert_not_called()
+
+
+class TestCaptchaDetectedError:
+    """Tests for CaptchaDetectedError exception and _check_for_captcha method."""
+
+    def test_captcha_detected_error_is_importable(self):
+        """Test that CaptchaDetectedError can be imported and is an Exception."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        assert issubclass(CaptchaDetectedError, Exception)
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    async def test_check_for_captcha_raises_on_sorry_url(self, mock_read_csv):
+        """Test that _check_for_captcha raises on /sorry/ URL pattern."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        scraper = GoogleFlightsScraper()
+
+        mock_page = MagicMock()
+        mock_page.url = "https://www.google.com/sorry/index?hl=en"
+        mock_page.title = AsyncMock(return_value="Google")
+        scraper.page = mock_page
+
+        with pytest.raises(CaptchaDetectedError, match="bot-detection URL pattern"):
+            await scraper._check_for_captcha()
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    async def test_check_for_captcha_raises_on_unusual_traffic_title(self, mock_read_csv):
+        """Test that _check_for_captcha raises when title contains 'unusual traffic'."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        scraper = GoogleFlightsScraper()
+
+        mock_page = MagicMock()
+        mock_page.url = "https://www.google.com/travel/flights"
+        mock_page.title = AsyncMock(return_value="Unusual Traffic Detected - Google")
+        mock_page.locator.return_value.count = AsyncMock(return_value=0)
+        scraper.page = mock_page
+
+        with pytest.raises(CaptchaDetectedError, match="unusual traffic"):
+            await scraper._check_for_captcha()
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    async def test_check_for_captcha_raises_on_recaptcha_element(self, mock_read_csv):
+        """Test that _check_for_captcha raises when reCAPTCHA widget is present."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        scraper = GoogleFlightsScraper()
+
+        mock_page = MagicMock()
+        mock_page.url = "https://www.google.com/travel/flights"
+        mock_page.title = AsyncMock(return_value="Google Flights")
+        mock_page.locator.return_value.count = AsyncMock(return_value=1)
+        scraper.page = mock_page
+
+        with pytest.raises(CaptchaDetectedError, match="reCAPTCHA widget"):
+            await scraper._check_for_captcha()
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    async def test_check_for_captcha_passes_when_no_signals(self, mock_read_csv):
+        """Test that _check_for_captcha does not raise when page is clean."""
+        scraper = GoogleFlightsScraper()
+
+        mock_page = MagicMock()
+        mock_page.url = "https://www.google.com/travel/flights"
+        mock_page.title = AsyncMock(return_value="Google Flights")
+        mock_page.locator.return_value.count = AsyncMock(return_value=0)
+        scraper.page = mock_page
+
+        # Should not raise
+        await scraper._check_for_captcha()
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    @patch('google_flights_scraper.scraper.setup_browser', new_callable=AsyncMock)
+    async def test_captcha_error_propagates_out_of_scrape_flight(
+        self, mock_setup, mock_read_csv
+    ):
+        """Test that CaptchaDetectedError re-raises out of scrape_flight."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        scraper = GoogleFlightsScraper()
+
+        mock_playwright = MagicMock()
+        mock_playwright.stop = AsyncMock()
+        mock_browser = MagicMock()
+        mock_browser.close = AsyncMock()
+        mock_context = MagicMock()
+        mock_context.close = AsyncMock()
+        mock_page = MagicMock()
+        mock_page.close = AsyncMock()
+        mock_page.goto = AsyncMock()
+
+        mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
+
+        with patch.object(scraper, '_validate_inputs'), \
+             patch('google_flights_scraper.scraper.asyncio.sleep', new_callable=AsyncMock), \
+             patch.object(
+                 scraper, '_check_for_captcha',
+                 new_callable=AsyncMock,
+                 side_effect=CaptchaDetectedError("CAPTCHA detected"),
+             ):
+            with pytest.raises(CaptchaDetectedError):
+                await scraper.scrape_flight(
+                    "LAX", "USA", "SFO", "USA",
+                    start, end, "Economy"
+                )
+
+    @pytest.mark.asyncio
+    @patch('pandas.read_csv')
+    @patch('google_flights_scraper.scraper.setup_browser', new_callable=AsyncMock)
+    async def test_cleanup_happens_on_captcha_error(self, mock_setup, mock_read_csv):
+        """Test that browser is cleaned up even when CaptchaDetectedError is raised."""
+        from google_flights_scraper.scraper import CaptchaDetectedError
+        scraper = GoogleFlightsScraper()
+
+        mock_playwright = MagicMock()
+        mock_playwright.stop = AsyncMock()
+        mock_browser = MagicMock()
+        mock_browser.close = AsyncMock()
+        mock_context = MagicMock()
+        mock_context.close = AsyncMock()
+        mock_page = MagicMock()
+        mock_page.close = AsyncMock()
+        mock_page.goto = AsyncMock()
+
+        mock_setup.return_value = (mock_playwright, mock_browser, mock_context, mock_page)
+
+        with patch.object(scraper, '_validate_inputs'), \
+             patch('google_flights_scraper.scraper.asyncio.sleep', new_callable=AsyncMock), \
+             patch.object(
+                 scraper, '_check_for_captcha',
+                 new_callable=AsyncMock,
+                 side_effect=CaptchaDetectedError("CAPTCHA detected"),
+             ):
+            with pytest.raises(CaptchaDetectedError):
+                await scraper.scrape_flight(
+                    "LAX", "USA", "SFO", "USA",
+                    start, end, "Economy"
+                )
+
+        mock_page.close.assert_called_once()
+        mock_context.close.assert_called_once()
+        mock_browser.close.assert_called_once()
+        mock_playwright.stop.assert_called_once()
