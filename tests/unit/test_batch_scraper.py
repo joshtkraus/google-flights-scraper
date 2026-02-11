@@ -5,8 +5,7 @@ import pytest
 from unittest.mock import MagicMock, AsyncMock, patch
 import pandas as pd
 from google_flights_scraper.batch_scraper import (
-    scrape_multiple_destinations,
-    scrape_date_range,
+    scrape_multiple,
     _flatten_result,
 )
 
@@ -14,6 +13,9 @@ pytestmark = pytest.mark.unit
 
 # Get today's date
 today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 class TestFlattenResult:
     """Tests for _flatten_result helper function - sync, no changes needed."""
@@ -65,18 +67,18 @@ class TestFlattenResult:
         assert flat["departure_layover_durations"] == ["2 hr", "1 hr 30 min"]
 
 
-class TestMultipleDestinationsValidation:
-    """Tests for input validation in scrape_multiple_destinations."""
+class TestMultipleValidation:
+    """Tests for input validation in scrape_multiple."""
 
     @pytest.mark.asyncio
     async def test_raises_error_when_arrival_codes_and_countries_length_mismatch(self):
         """Test that ValueError raised when array lengths don't match."""
         with pytest.raises(ValueError, match="arrival_codes and arrival_countries must have same length"):
-            await scrape_multiple_destinations(
+            await scrape_multiple(
                 "LAX", "USA",
                 ["SFO", "SEA"],
                 ["USA"],
-                "03/15/2026", "03/22/2026",
+                [start, start], [end, end],
                 ["Economy", "Economy"],
             )
 
@@ -84,17 +86,17 @@ class TestMultipleDestinationsValidation:
     async def test_raises_error_when_arrival_codes_and_seat_classes_length_mismatch(self):
         """Test that ValueError raised when seat classes length doesn't match."""
         with pytest.raises(ValueError, match="arrival_codes and seat_classes must have same length"):
-            await scrape_multiple_destinations(
+            await scrape_multiple(
                 "LAX", "USA",
                 ["SFO", "SEA"],
                 ["USA", "USA"],
-                "03/15/2026", "03/22/2026",
+                [start, start], [end, end],
                 ["Economy"],
             )
 
 
-class TestMultipleDestinationsLogic:
-    """Tests for scrape_multiple_destinations logic."""
+class TestMultipleLogic:
+    """Tests for scrape_multiple logic."""
 
     @pytest.mark.asyncio
     @patch('google_flights_scraper.batch_scraper.GoogleFlightsScraper')
@@ -109,11 +111,12 @@ class TestMultipleDestinationsLogic:
         })
         mock_scraper_class.return_value = mock_scraper
 
-        await scrape_multiple_destinations(
+        await scrape_multiple(
             "LAX", "USA",
             ["SFO", "SEA", "PDX"],
             ["USA", "USA", "USA"],
-            "03/15/2026", "03/22/2026",
+            [start, start, start],
+            [end, end, end],
             ["Economy", "Economy", "Economy"],
             delay_seconds=2.0,
             n_jobs=1,
@@ -134,11 +137,12 @@ class TestMultipleDestinationsLogic:
         ])
         mock_scraper_class.return_value = mock_scraper
 
-        df = await scrape_multiple_destinations(
+        df = await scrape_multiple(
             "LAX", "USA",
             ["SFO", "SEA", "PDX"],
             ["USA", "USA", "USA"],
-            "03/15/2026", "03/22/2026",
+            [start, start, start],
+            [end, end, end],
             ["Economy", "Economy", "Economy"],
             delay_seconds=0,
             n_jobs=1,
@@ -156,11 +160,12 @@ class TestMultipleDestinationsLogic:
         })
         mock_scraper_class.return_value = mock_scraper
 
-        df = await scrape_multiple_destinations(
+        df = await scrape_multiple(
             "LAX", "USA",
             ["SFO", "SEA", "PDX"],
             ["USA", "USA", "USA"],
-            "03/15/2026", "03/22/2026",
+            [start, start, start],
+            [end, end, end],
             ["Economy", "Economy", "Economy"],
             n_jobs=3,
         )
@@ -168,34 +173,6 @@ class TestMultipleDestinationsLogic:
         # All 3 should complete
         assert len(df) == 3
         assert mock_scraper.scrape_flight.call_count == 3
-
-
-class TestDateRangeGeneration:
-    """Tests for date range generation logic."""
-
-    @pytest.mark.asyncio
-    @patch('google_flights_scraper.batch_scraper.GoogleFlightsScraper')
-    async def test_includes_trip_length_in_results(self, mock_scraper_class):
-        """Test that trip_length_days is added to flattened results."""
-        mock_scraper = MagicMock()
-        mock_scraper.scrape_flight = AsyncMock(return_value={
-            "inputs": {}, "price": 200, "status": "Success",
-        })
-        mock_scraper_class.return_value = mock_scraper
-
-        # Create Dates
-        start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-        end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
-
-        df = await scrape_date_range(
-            "LAX", "USA", "SFO", "USA",
-            start, end,
-            min_trip_length=2, max_trip_length=2,
-            seat_class="Economy",
-            delay_seconds=0,
-        )
-
-        assert "trip_length_days" in df.columns
 
 
 class TestErrorHandling:
@@ -213,11 +190,12 @@ class TestErrorHandling:
         ])
         mock_scraper_class.return_value = mock_scraper
 
-        df = await scrape_multiple_destinations(
+        df = await scrape_multiple(
             "LAX", "USA",
             ["SFO", "SEA", "PDX"],
             ["USA", "USA", "USA"],
-            "03/15/2026", "03/22/2026",
+            [start, start, start],
+            [end, end, end],
             ["Economy", "Economy", "Economy"],
             delay_seconds=0,
             n_jobs=1,
@@ -244,18 +222,18 @@ class TestCSVOutput:
         mock_scraper_class.return_value = mock_scraper
 
         # With path - should save
-        await scrape_multiple_destinations(
+        await scrape_multiple(
             "LAX", "USA", ["SFO"], ["USA"],
-            "03/15/2026", "03/22/2026", ["Economy"],
+            [start], [end], ["Economy"],
             output_path="results.csv", delay_seconds=0,
         )
         mock_to_csv.assert_called_once_with("results.csv", index=False)
 
         # Without path - should not save
         mock_to_csv.reset_mock()
-        await scrape_multiple_destinations(
+        await scrape_multiple(
             "LAX", "USA", ["SFO"], ["USA"],
-            "03/15/2026", "03/22/2026", ["Economy"],
+            [start], [end], ["Economy"],
             output_path=None, delay_seconds=0,
         )
         mock_to_csv.assert_not_called()

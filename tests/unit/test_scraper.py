@@ -1,10 +1,17 @@
 """Unit tests for GoogleFlightsScraper class."""
 
+from datetime import datetime, timedelta
 import pytest
 from unittest.mock import MagicMock, AsyncMock, patch, mock_open
 from google_flights_scraper import GoogleFlightsScraper
 
 pytestmark = pytest.mark.unit
+
+# Get today's date
+today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 class TestInit:
     """Tests for initialization."""
@@ -114,7 +121,7 @@ class TestCleanupLogic:
 
             result = await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
-                "03/15/2026", "03/22/2026", "Economy"
+                start, end, "Economy"
             )
 
             mock_page.close.assert_called_once()
@@ -155,7 +162,7 @@ class TestConditionalLogic:
 
             await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
-                "03/15/2026", "03/22/2026", "Economy"
+                start, end, "Economy"
             )
 
             mock_extract.assert_not_called()
@@ -187,7 +194,7 @@ class TestConditionalLogic:
 
             await scraper.scrape_flight(
                 "LAX", "USA", "SFO", "USA",
-                "03/15/2026", "03/22/2026", "Economy",
+                start, end, "Economy",
                 export_path=None
             )
 

@@ -6,14 +6,16 @@ from unittest.mock import MagicMock, patch
 from google_flights_scraper.jupyter_helper import (
     _run_script,
     scrape_flight,
-    scrape_multiple_destinations,
-    scrape_date_range,
+    scrape_multiple,
 )
 
 pytestmark = pytest.mark.unit
 
 # Get today's date
 today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 class TestRunScript:
     """Tests for _run_script subprocess execution - unchanged (still sync)."""
@@ -105,7 +107,7 @@ class TestScrapeFlightScriptGeneration:
 
         scrape_flight(
             "LAX", "USA", "SFO", "USA",
-            "03/15/2026", "03/22/2026", "Economy"
+            start, end, "Economy"
         )
 
         script = mock_run_script.call_args[0][0]
@@ -126,18 +128,18 @@ class TestScrapeFlightScriptGeneration:
         mock_run_script.return_value = {"price": 250}
 
         # Test with None
-        scrape_flight("LAX", "USA", "SFO", "USA", "03/15/2026", "03/22/2026", "Economy", export_path=None)
+        scrape_flight("LAX", "USA", "SFO", "USA", start, end, "Economy", export_path=None)
         script_none = mock_run_script.call_args[0][0]
         assert "export_path=None" in script_none
 
         # Test with value
-        scrape_flight("LAX", "USA", "SFO", "USA", "03/15/2026", "03/22/2026", "Economy", export_path="out.json")
+        scrape_flight("LAX", "USA", "SFO", "USA", start, end, "Economy", export_path="out.json")
         script_value = mock_run_script.call_args[0][0]
         assert 'export_path="out.json"' in script_value
 
 
-class TestScrapeMultipleDestinationsScriptGeneration:
-    """Tests for scrape_multiple_destinations script generation."""
+class TestScrapeMultipleScriptGeneration:
+    """Tests for scrape_multiple script generation."""
 
     @patch('google_flights_scraper.jupyter_helper._run_script')
     @patch('pandas.DataFrame')
@@ -145,11 +147,12 @@ class TestScrapeMultipleDestinationsScriptGeneration:
         """Test that list parameters are correctly formatted in script."""
         mock_run_script.return_value = [{"price": 200}]
 
-        scrape_multiple_destinations(
+        scrape_multiple(
             "LAX", "USA",
             ["SFO", "SEA"],
             ["USA", "USA"],
-            "03/15/2026", "03/22/2026",
+            [start, start],
+            [end, end],
             ["Economy", "Economy"]
         )
 
@@ -157,7 +160,7 @@ class TestScrapeMultipleDestinationsScriptGeneration:
 
         # Verify async structure
         assert "asyncio.run(main())" in script
-        assert "await scrape_multiple_destinations(" in script
+        assert "await scrape_multiple(" in script
 
         # Verify list parameters
         assert "['SFO', 'SEA']" in script
@@ -170,59 +173,11 @@ class TestScrapeMultipleDestinationsScriptGeneration:
         """Test that n_jobs is correctly passed to script."""
         mock_run_script.return_value = [{"price": 200}]
 
-        scrape_multiple_destinations(
+        scrape_multiple(
             "LAX", "USA", ["SFO"], ["USA"],
-            "03/15/2026", "03/22/2026", ["Economy"],
+            [start], [end], ["Economy"],
             n_jobs=3
         )
 
         script = mock_run_script.call_args[0][0]
         assert "n_jobs=3" in script
-
-
-class TestScrapeDateRangeScriptGeneration:
-    """Tests for scrape_date_range script generation."""
-
-    @patch('google_flights_scraper.jupyter_helper._run_script')
-    @patch('pandas.DataFrame')
-    def test_passes_integer_params_without_quotes(self, mock_df, mock_run_script):
-        """Test that integer parameters are not quoted in script."""
-        mock_run_script.return_value = [{"price": 200}]
-
-        # Create Dates
-        start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-        end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
-
-        scrape_date_range(
-            "LAX", "USA", "SFO", "USA",
-            start, end,
-            min_trip_length=2,
-            max_trip_length=5,
-            seat_class="Economy"
-        )
-
-        script = mock_run_script.call_args[0][0]
-
-        assert "min_trip_length=2" in script
-        assert "max_trip_length=5" in script
-        assert 'min_trip_length="2"' not in script
-
-    @patch('google_flights_scraper.jupyter_helper._run_script')
-    @patch('pandas.DataFrame')
-    def test_passes_n_jobs_parameter(self, mock_df, mock_run_script):
-        """Test that n_jobs is correctly passed to script."""
-        mock_run_script.return_value = [{"price": 200}]
-
-        # Create Dates
-        start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-        end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
-
-        scrape_date_range(
-            "LAX", "USA", "SFO", "USA",
-            start, end, 2, 5, "Economy",
-            n_jobs=5
-        )
-
-        script = mock_run_script.call_args[0][0]
-        assert "n_jobs=5" in script
-        assert "asyncio.run(main())" in script
