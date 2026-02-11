@@ -60,10 +60,15 @@ See `docs/tutorial` for usage examples.
 
 5. Run unit tests locally
    ```bash
-   uv run pytest -xv
+   uv run pytest # add optional -m unit or -m integration to run specify tests
    ```
 
-6. OPTIONAL: Run integration tests and upload coverage
+6. Create PR to merge to `dev`
+
+## Merging to Main
+1. Create a PR to merge `dev` into `main`
+
+2. Run tests and upload coverage
    Create a .env file in your project root:
    ```bash
    CODECOV_TOKEN=your_token_here
@@ -82,4 +87,6 @@ See `docs/tutorial` for usage examples.
    codecovcli upload-process
    ```
 
-7. Create PR to merge to `dev`
+3. If approved and sufficient coverage, merge `dev` into `main`
+
+4. Create new release using tag: `vX.x.x`
