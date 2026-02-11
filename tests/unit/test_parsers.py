@@ -201,6 +201,7 @@ class TestExtractFinalPrice:
     async def test_extract_price_successfully(self, mock_wait):
         """Test successful price extraction."""
         mock_page = MagicMock()
+        mock_page.mouse.wheel = AsyncMock()
         mock_element = MagicMock()
         mock_element.wait_for = AsyncMock()
         mock_element.get_attribute = AsyncMock(return_value="250 US dollars")
@@ -216,6 +217,7 @@ class TestExtractFinalPrice:
     async def test_extract_price_with_comma(self, mock_wait):
         """Test price extraction with comma separator."""
         mock_page = MagicMock()
+        mock_page.mouse.wheel = AsyncMock()
         mock_element = MagicMock()
         mock_element.wait_for = AsyncMock()
         mock_element.get_attribute = AsyncMock(return_value="1,250 US dollars")
@@ -230,6 +232,8 @@ class TestExtractFinalPrice:
     async def test_extract_price_returns_none_on_timeout(self, mock_wait):
         """Test that None returned when price element not found."""
         mock_page = MagicMock()
+        mock_page.mouse.wheel = AsyncMock()
+        mock_page.mouse.wheel = AsyncMock()
         mock_element = MagicMock()
         mock_element.wait_for = AsyncMock(side_effect=PlaywrightTimeoutError("timeout"))
         mock_page.locator.return_value.first = mock_element
@@ -243,6 +247,7 @@ class TestExtractFinalPrice:
     async def test_extract_price_returns_none_when_regex_fails(self, mock_wait):
         """Test that None returned when aria-label doesn't match regex."""
         mock_page = MagicMock()
+        mock_page.mouse.wheel = AsyncMock()
         mock_element = MagicMock()
         mock_element.wait_for = AsyncMock()
         mock_element.get_attribute = AsyncMock(return_value="Invalid format")

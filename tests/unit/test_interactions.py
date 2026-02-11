@@ -21,6 +21,9 @@ pytestmark = pytest.mark.unit
 
 # Get today's date
 today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 class TestEnterDepartureAirport:
     """Tests for enter_departure_airport function."""
@@ -108,9 +111,6 @@ class TestEnterDepartureDate:
         mock_locator.nth.return_value = mock_locator
         mock_page.locator.return_value = mock_locator
 
-        # Create Dates
-        start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-
         await enter_departure_date(mock_page, start)
 
         mock_locator.fill.assert_called_once_with(start)
@@ -130,9 +130,6 @@ class TestEnterReturnDate:
         mock_locator.nth.return_value = mock_locator
         mock_page.locator.return_value = mock_locator
 
-        # Create Dates
-        end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
-
         await enter_return_date(mock_page, end)
 
         mock_locator.fill.assert_called_once_with(end)
@@ -148,10 +145,6 @@ class TestEnterDates:
     async def test_calls_both_date_functions(self, mock_return, mock_departure):
         """Test that both date entry functions are called."""
         mock_page = MagicMock()
-
-        # Create Dates
-        start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-        end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
         await enter_dates(mock_page, start, end)
 

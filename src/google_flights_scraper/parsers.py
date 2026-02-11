@@ -1,5 +1,7 @@
 """Data extraction and parsing functions for Google Flights scraper."""
 
+import asyncio
+import random
 import re
 import sys
 
@@ -247,6 +249,10 @@ async def extract_final_price(page: Page, timeout: int):
         stable_duration=2.0,
         timeout=timeout,
     )
+
+    await asyncio.sleep(max(0.0, 0.5 + random.uniform(-0.25, 0.25)))
+
+    await page.mouse.wheel(delta_x=0, delta_y=max(0.0, 350 + random.uniform(-100, 100)))
 
     # Target the specific price element near "Lowest total price" text
     selector = "div:has-text('Lowest total price') div span[aria-label*='US dollars']"

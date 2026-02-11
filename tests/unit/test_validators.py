@@ -16,6 +16,9 @@ pytestmark = pytest.mark.unit
 
 # Get today's date
 today = datetime.today()
+# Create Dates
+start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
+end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
 
 @pytest.fixture
 def airport_df():
@@ -29,25 +32,17 @@ def airport_df():
 # Date validation tests
 def test_valid_dates():
     """Test that valid dates pass validation."""
-    # Create Dates
-    start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-    end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
     validate_dates(start, end)  # Should not raise
 
 
 def test_end_date_before_start_date():
     """Test that end date before start date raises ValueError."""
-    # Create Dates
-    start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
-    end = (today + timedelta(weeks=5)).strftime("%m/%d/%Y")
     with pytest.raises(ValueError):
         validate_dates(end, start)
 
 
 def test_same_dates():
     """Test that same start and end dates raise ValueError."""
-    # Create Dates
-    start = (today + timedelta(weeks=4)).strftime("%m/%d/%Y")
     with pytest.raises(ValueError):
         validate_dates(start, start)
 
