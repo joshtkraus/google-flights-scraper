@@ -1759,6 +1759,7 @@ today = datetime.today()</div>
     <span class="s2">"num_stops"</span><span class="p">,</span>
     <span class="s2">"connection_airports"</span><span class="p">,</span>
     <span class="s2">"layover_durations"</span><span class="p">,</span>
+    <span class="s2">"layover_total_minutes"</span><span class="p">,</span>
     <span class="s2">"arrival_airport"</span><span class="p">,</span>
     <span class="s2">"arrival_date"</span><span class="p">,</span>
     <span class="s2">"arrival_time"</span>
@@ -1775,6 +1776,7 @@ today = datetime.today()</div>
     <span class="s2">"num_stops"</span><span class="p">,</span>
     <span class="s2">"connection_airports"</span><span class="p">,</span>
     <span class="s2">"layover_durations"</span><span class="p">,</span>
+    <span class="s2">"layover_total_minutes"</span><span class="p">,</span>
     <span class="s2">"arrival_airport"</span><span class="p">,</span>
     <span class="s2">"arrival_date"</span><span class="p">,</span>
     <span class="s2">"arrival_time"</span>
@@ -1906,6 +1908,7 @@ result = scrape_flight(
   'num_stops': 0,
   'connection_airports': [],
   'layover_durations': [],
+  'layover_total_minutes': 0,
   'arrival_airport': 'Newark Liberty International Airport',
   'arrival_date': 'Wednesday, March 11',
   'arrival_time': '4:35 PM',
@@ -1920,6 +1923,7 @@ result = scrape_flight(
   'num_stops': 0,
   'connection_airports': [],
   'layover_durations': [],
+  'layover_total_minutes': 0,
   'arrival_airport': 'Los Angeles International Airport',
   'arrival_date': 'Wednesday, March 18',
   'arrival_time': '10:14 PM',
@@ -1927,12 +1931,12 @@ result = scrape_flight(
   'duration_str': '6 hr 15 min',
   'carry_on_bags': 0,
   'checked_bags': 0},
- 'price': 116,
+ 'price': 115,
  'price_classification': 'low',
- 'price_difference': 90,
- 'price_relativity': 0.4369,
+ 'price_difference': 91,
+ 'price_relativity': 0.4417,
  'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpGEgoyMDI2LTAzLTExIiAKA0xBWBIKMjAyNi0wMy0xMRoDRVdSKgJOSzIEMTY5M2oHCAESA0xBWHINCAMSCS9tLzAyXzI4NhpGEgoyMDI2LTAzLTE4IiAKA0VXUhIKMjAyNi0wMy0xOBoDTEFYKgJOSzIEMTY3MGoNCAMSCS9tLzAyXzI4NnIHCAESA0xBWEABSAFwAYIBCwj___________8BmAEB&amp;tfu=CmxDalJJYUdWcGRuTjVUMDFqWnpSQlFqazNSVkZDUnkwdExTMHRMUzB0TFMxMmQySnJNVUZCUVVGQlIyMU5aa2x2VFhVMGNHbEJFZ1pPU3pFMk56QWFDZ2lzV2hBQ0dnTlZVMFE0SEhDc1dnPT0SAggAIgYKATESATA'}</pre>
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhpGEgoyMDI2LTAzLTExIiAKA0xBWBIKMjAyNi0wMy0xMRoDRVdSKgJOSzIEMTY5M2oHCAESA0xBWHINCAMSCS9tLzAyXzI4NhpGEgoyMDI2LTAzLTE4IiAKA0VXUhIKMjAyNi0wMy0xOBoDTEFYKgJOSzIEMTY3MGoNCAMSCS9tLzAyXzI4NnIHCAESA0xBWEABSAFwAYIBCwj___________8BmAEB&amp;tfu=CmxDalJJYVRSSWNURjJZbGRZTnpoQlFYWlJRa0ZDUnkwdExTMHRMUzB0TFMxMmQzbGpNVUZCUVVGQlIyMU9TMEl3VFV3MGVDMUJFZ1pPU3pFMk56QWFDZ2lzV2hBQ0dnTlZVMFE0SEhDc1dnPT0SAggAIgYKATESATA'}</pre>
 </div>
 </div>
 </div>
@@ -2062,6 +2066,7 @@ result = scrape_flight(
   'connection_airports': ['Billy Bishop Toronto City Airport',
    'Montréal-Pierre Elliott Trudeau International Airport'],
   'layover_durations': ['1 hr 11 min', '1 hr 5 min'],
+  'layover_total_minutes': 136,
   'arrival_airport': 'Narita International Airport',
   'arrival_date': 'Thursday, April 9',
   'arrival_time': '3:25 PM',
@@ -2076,6 +2081,7 @@ result = scrape_flight(
   'num_stops': 1,
   'connection_airports': ['Montréal-Pierre Elliott Trudeau International Airport'],
   'layover_durations': ['2 hr 55 min'],
+  'layover_total_minutes': 175,
   'arrival_airport': 'LaGuardia Airport',
   'arrival_date': 'Wednesday, April 22',
   'arrival_time': '9:30 PM',
@@ -2088,7 +2094,7 @@ result = scrape_flight(
  'price_difference': None,
  'price_relativity': None,
  'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhqMARIKMjAyNi0wNC0wOCIgCgNMR0ESCjIwMjYtMDQtMDgaA1lUWioCQUMyBDg1MzEiIAoDWVRaEgoyMDI2LTA0LTA4GgNZVUwqAkFDMgQ3OTU4Ih0KA1lVTBIKMjAyNi0wNC0wOBoDTlJUKgJBQzIBNWoNCAMSCS9tLzAyXzI4NnIMCAMSCC9tLzA3ZGZrGmkSCjIwMjYtMDQtMjIiHQoDTlJUEgoyMDI2LTA0LTIyGgNZVUwqAkFDMgE2Ih8KA1lVTBIKMjAyNi0wNC0yMhoDTEdBKgJBQzIDNzM2agwIAxIIL20vMDdkZmtyDQgDEgkvbS8wMl8yODZAAUgCcAGCAQsI____________AZgBAQ&amp;tfu=CnRDalJJVkhkd1QzazFOREUxYW05QlEyWnFPWGRDUnkwdExTMHRMUzB0TFhaMGRHRXlNVUZCUVVGQlIyMU5aa3RuUVMxdU56QkJFZ3RCUXpaOFFVTTNNellqTVJvTENQV2dDaEFDR2dOVlUwUTRISEQxb0FvPRICCAAiAA'}</pre>
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhqMARIKMjAyNi0wNC0wOCIgCgNMR0ESCjIwMjYtMDQtMDgaA1lUWioCQUMyBDg1MzEiIAoDWVRaEgoyMDI2LTA0LTA4GgNZVUwqAkFDMgQ3OTU4Ih0KA1lVTBIKMjAyNi0wNC0wOBoDTlJUKgJBQzIBNWoNCAMSCS9tLzAyXzI4NnIMCAMSCC9tLzA3ZGZrGmkSCjIwMjYtMDQtMjIiHQoDTlJUEgoyMDI2LTA0LTIyGgNZVUwqAkFDMgE2Ih8KA1lVTBIKMjAyNi0wNC0yMhoDTEdBKgJBQzIDNzM2agwIAxIIL20vMDdkZmtyDQgDEgkvbS8wMl8yODZAAUgCcAGCAQsI____________AZgBAQ&amp;tfu=CnRDalJJYjNadVJqSmZTVlpSVjNOQlFXaFNNbWRDUnkwdExTMHRMUzB0TFMxM1ptaHJOMEZCUVVGQlIyMU9TMFJ6UTFkUmF6aEJFZ3RCUXpaOFFVTTNNellqTVJvTENQV2dDaEFDR2dOVlUwUTRISEQxb0FvPRICCAAiAA'}</pre>
 </div>
 </div>
 </div>
@@ -2218,6 +2224,7 @@ result = scrape_flight(
   'num_stops': 1,
   'connection_airports': ['Detroit Metropolitan Wayne County Airport'],
   'layover_durations': ['1 hr 49 min'],
+  'layover_total_minutes': 109,
   'arrival_airport': 'Ronald Reagan Washington National Airport',
   'arrival_date': 'Wednesday, March 25',
   'arrival_time': '4:35 PM',
@@ -2232,6 +2239,7 @@ result = scrape_flight(
   'num_stops': 1,
   'connection_airports': ['Seattle-Tacoma International Airport'],
   'layover_durations': ['2 hr 11 min'],
+  'layover_total_minutes': 131,
   'arrival_airport': 'San Francisco International Airport',
   'arrival_date': 'Wednesday, April 1',
   'arrival_time': '11:57 PM',
@@ -2244,7 +2252,7 @@ result = scrape_flight(
  'price_difference': 0,
  'price_relativity': 0.0,
  'status': 'Ran successfully.',
- 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhphEgoyMDI2LTAzLTI1Ih8KA1NGTxIKMjAyNi0wMy0yNRoDRFRXKgJETDIDNzcyIiAKA0RUVxIKMjAyNi0wMy0yNRoDRENBKgJETDIEMTQ1NGoHCAESA1NGT3IHCAESA0RDQRphEgoyMDI2LTA0LTAxIh8KA0RDQRIKMjAyNi0wNC0wMRoDU0VBKgJETDIDNzg2IiAKA1NFQRIKMjAyNi0wNC0wMRoDU0ZPKgJETDIEMjYzNWoHCAESA0RDQXIHCAESA1NGT0ABSAFwAYIBCwj___________8BmAEByAEB&amp;tfu=CnRDalJJYkVSeUxXeFFUMkYxU1RoQlEwVTBTMmRDUnkwdExTMHRMUzB0TFMxMmRIVnFPRUZCUVVGQlIyMU5aazF6VFhKelNITkJFZ3hFVERjNE5ueEVUREkyTXpVYUN3aWhuZ0lRQWhvRFZWTkVPQnh3b1o0QxICCAAiAA'}</pre>
+ 'url': 'https://www.google.com/travel/flights/booking?tfs=CBwQAhphEgoyMDI2LTAzLTI1Ih8KA1NGTxIKMjAyNi0wMy0yNRoDRFRXKgJETDIDNzcyIiAKA0RUVxIKMjAyNi0wMy0yNRoDRENBKgJETDIEMTQ1NGoHCAESA1NGT3IHCAESA0RDQRphEgoyMDI2LTA0LTAxIh8KA0RDQRIKMjAyNi0wNC0wMRoDU0VBKgJETDIDNzg2IiAKA1NFQRIKMjAyNi0wNC0wMRoDU0ZPKgJETDIEMjYzNWoHCAESA0RDQXIHCAESA1NGT0ABSAFwAYIBCwj___________8BmAEByAEB&amp;tfu=CnRDalJJYzFBdFFXNTNNRWh2WkZWQlFXa3hNRkZDUnkwdExTMHRMUzB0TFMxMmQzQnFORUZCUVVGQlIyMU9TMFkwUVZSMVRsRkJFZ3hFVERjNE5ueEVUREkyTXpVYUN3aWhuZ0lRQWhvRFZWTkVPQnh3b1o0QxICCAAiAA'}</pre>
 </div>
 </div>
 </div>
