@@ -25,6 +25,7 @@ def create_empty_flight_info():
         "num_stops": None,
         "connection_airports": [],
         "layover_durations": [],
+        "layover_total_minutes": None,
         "arrival_airport": None,
         "arrival_date": None,
         "arrival_time": None,
@@ -142,20 +143,37 @@ def extract_duration(flight_description: str):
     Returns:
         tuple: (duration_minutes, duration_str) or (None, None)
     """
-    if m := re.search(r"Total duration (\d+) hr (\d+) min", flight_description):
+    if m := re.search(r"(?:Total duration )?(\d+) hr (\d+) min", flight_description):
         hours = int(m.group(1))
         minutes = int(m.group(2))
         return hours * 60 + minutes, f"{hours} hr {minutes} min"
 
-    if m := re.search(r"Total duration (\d+) hr", flight_description):
+    if m := re.search(r"(?:Total duration )?(\d+) hr", flight_description):
         hours = int(m.group(1))
         return hours * 60, f"{hours} hr"
 
-    if m := re.search(r"Total duration (\d+) min", flight_description):
+    if m := re.search(r"(?:Total duration )?(\d+) min", flight_description):
         minutes = int(m.group(1))
         return minutes, f"{minutes} min"
 
     return None, None
+
+
+def total_layover_duration(layovers: list[str]):
+    """Extract layover duration as minutes.
+
+    Args:
+        layovers (list[str]): Layover text
+
+    Returns:
+        int: Total layover mintues
+    """
+    if len(layovers) == 0:
+        return 0
+    layover_totals = []
+    for layover in layovers:
+        layover_totals.append(extract_duration(layover)[0])
+    return int(sum(layover_totals))
 
 
 def extract_baggage_info(flight_description: str):
@@ -221,6 +239,8 @@ async def extract_flight_details(flight_element: Locator):
     flight_info["connection_airports"], flight_info["layover_durations"] = extract_layover_info(
         flight_description
     )
+
+    flight_info["layover_total_minutes"] = total_layover_duration(flight_info["layover_durations"])
 
     flight_info["duration_minutes"], flight_info["duration_str"] = extract_duration(
         flight_description

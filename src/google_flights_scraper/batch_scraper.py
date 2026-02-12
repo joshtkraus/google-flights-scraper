@@ -321,7 +321,7 @@ async def _scrape_task(task: dict):
     """Execute a single scrape task and return flattened result.
 
     Args:
-        task (dict): Task parameters including optional trip_length key
+        task (dict): Task parameters
 
     Returns:
         dict: Flattened result dict
@@ -329,11 +329,17 @@ async def _scrape_task(task: dict):
     Raises:
         CaptchaDetectedError: When Captcha is detected.
     """
-    trip_length = task.pop("trip_length", None)
-
     try:
         scraper = GoogleFlightsScraper()
         result = await scraper.scrape_flight(**task)
+
+        if any(
+            err in result["status"] for err in ["Error entering departure date", "Price not found"]
+        ):
+            # retry once with extra delay
+            await asyncio.sleep(max(0.0, 5 + random.uniform(-1, 1)))
+            result = await scraper.scrape_flight(**task)
+
         flat_result = _flatten_result(result)
     except CaptchaDetectedError:
         raise  # propagate up to _scrape_task_with_timeout for centralised handling
@@ -350,9 +356,6 @@ async def _scrape_task(task: dict):
             "status": f"Error: {str(e)}",
             "price": None,
         }
-
-    if trip_length is not None:
-        flat_result["trip_length_days"] = trip_length
 
     return flat_result
 
