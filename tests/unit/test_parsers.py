@@ -10,6 +10,7 @@ from google_flights_scraper.parsers import (
     extract_arrival_info,
     extract_num_stops,
     extract_layover_info,
+    total_layover_duration,
     extract_duration,
     extract_baggage_info,
     extract_flight_details,
@@ -97,6 +98,9 @@ class TestExtractLayoverInfo:
         assert airports == ["Dallas Fort Worth International Airport"]
         assert durations == ["2 hr 30 min"]
 
+        total_layover_minutes = total_layover_duration(durations)
+        assert total_layover_minutes == 150
+
     def test_multiple_layovers(self):
         """Test multiple layovers extraction."""
         desc = (
@@ -108,9 +112,17 @@ class TestExtractLayoverInfo:
         assert airports == ["Atlanta", "Denver"]
         assert durations == ["2 hr", "1 hr 30 min"]
 
+        total_layover_minutes = total_layover_duration(durations)
+        assert total_layover_minutes == 210
+
     def test_no_layover(self):
         """Test that no layover returns empty lists."""
-        assert extract_layover_info("Nonstop") == ([], [])
+        airports, durations = extract_layover_info("Nonstop")
+
+        assert (airports, durations) == ([], [])
+
+        total_layover_minutes = total_layover_duration(durations)
+        assert total_layover_minutes == 0
 
 
 class TestExtractDuration:

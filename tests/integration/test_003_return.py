@@ -107,6 +107,19 @@ def test_departure_layover_durations(scraper_fixture, request):
             assert return_results["layover_durations"][0] != ""
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
+def test_departure_layover_total_duration(scraper_fixture, request):
+    """Test that scraper returns total departure layover duration."""
+    result = request.getfixturevalue(scraper_fixture)
+    departure_results = result["departure_flight"]
+    assert "layover_total_minutes" in departure_results.keys()
+    if result['status'] == "Ran successfully.":
+        assert isinstance(departure_results["layover_total_minutes"], int)
+        if departure_results["num_stops"] == 0:
+            assert departure_results["layover_total_minutes"] == 0
+        else:
+            assert departure_results["layover_total_minutes"] > 0
+
+@pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_arrival_airport(scraper_fixture, request):
     """Test that scraper returns arrival airport."""
     result = request.getfixturevalue(scraper_fixture)
