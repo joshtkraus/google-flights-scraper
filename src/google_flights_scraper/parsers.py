@@ -111,6 +111,9 @@ def extract_layover_info(flight_description: str):
     Returns:
         tuple: (connection_airports, layover_durations) as lists
     """
+    # Remove periods from single-letter abbreviations (e.g., "F." -> "F")
+    flight_description = re.sub(r"\b([A-Z])\.(?=\s)", r"\1", flight_description)
+
     # Pattern for "layover at [airport name]" - handles hours only, minutes only, or both
     pattern_at = (
         r"Layover \(\d+ of \d+\) is a (\d+\s+(?:hr|min)(?:\s+\d+\s+min)?)"

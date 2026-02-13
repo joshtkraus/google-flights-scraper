@@ -92,10 +92,10 @@ class TestExtractLayoverInfo:
 
     def test_single_layover(self):
         """Test single layover extraction."""
-        desc = "Layover (1 of 1) is a 2 hr 30 min layover at Dallas Fort Worth International Airport."
+        desc = "Layover (1 of 1) is a 2 hr 30 min layover at John F. Kennedy International Airport."
         airports, durations = extract_layover_info(desc)
 
-        assert airports == ["Dallas Fort Worth International Airport"]
+        assert airports == ["John F Kennedy International Airport"]
         assert durations == ["2 hr 30 min"]
 
         total_layover_minutes = total_layover_duration(durations)
