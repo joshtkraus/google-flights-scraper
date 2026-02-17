@@ -13,6 +13,7 @@ from google_flights_scraper.parsers import (
     total_layover_duration,
     extract_duration,
     extract_baggage_info,
+    extract_iata_codes,
     extract_flight_details,
     extract_final_price,
     parse_price_classification,
@@ -21,6 +22,7 @@ from google_flights_scraper.parsers import (
 )
 
 pytestmark = pytest.mark.unit
+
 
 class TestCreateEmptyFlightInfo:
     """Tests for create_empty_flight_info function."""
@@ -135,6 +137,14 @@ class TestExtractDuration:
         assert extract_duration("Total duration 45 min") == (45, "45 min")
         assert extract_duration("No duration") == (None, None)
 
+    def test_extract_duration_full(self):
+        text = """
+        From 660 US dollars round trip total. 1 stop flight with Aer Lingus.
+        Leaves New York John F Kennedy International at 4:55 PM on Saturday, June 6 and arrives at Amsterdam Airport Schiphol at 8:55 AM on Sunday, June 7.
+        Total duration 10 hr. Layover (1 of 1) is a 1 hr 45 min overnight layover at Dublin Airport in Dublin. Select flight
+        """
+        assert extract_duration(text) == (600, "10 hr")
+
 
 class TestExtractBaggageInfo:
     """Tests for extract_baggage_info function."""
@@ -147,6 +157,79 @@ class TestExtractBaggageInfo:
         assert extract_baggage_info("No baggage") == (None, None)
 
 
+class TestExtractIATACodes:
+    """Tests for extract_iata_codes function."""
+
+    @pytest.mark.asyncio
+    async def test_extract_direct_flight_codes(self):
+        """Test IATA extraction for nonstop flight."""
+        mock_element = MagicMock()
+        mock_codes_locator = MagicMock()
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "SFO"])
+        mock_element.locator.return_value = mock_codes_locator
+
+        result = await extract_iata_codes(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
+        assert "connection_airports" not in result
+
+    @pytest.mark.asyncio
+    async def test_extract_flight_with_connections(self):
+        """Test IATA extraction for flight with layovers."""
+        mock_element = MagicMock()
+        mock_codes_locator = MagicMock()
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "SFO", "DFW", "ORD"])
+        mock_element.locator.return_value = mock_codes_locator
+
+        result = await extract_iata_codes(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
+        assert result["connection_airports"] == ["DFW", "ORD"]
+
+    @pytest.mark.asyncio
+    async def test_extract_handles_whitespace(self):
+        """Test that whitespace is stripped from codes."""
+        mock_element = MagicMock()
+        mock_codes_locator = MagicMock()
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=[" LAX ", "SFO ", " JFK"])
+        mock_element.locator.return_value = mock_codes_locator
+
+        result = await extract_iata_codes(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
+        assert result["connection_airports"] == ["JFK"]
+
+    @pytest.mark.asyncio
+    async def test_extract_filters_non_alpha(self):
+        """Test that non-alphabetic codes are filtered out."""
+        mock_element = MagicMock()
+        mock_codes_locator = MagicMock()
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "123", "SFO", "AB1"])
+        mock_element.locator.return_value = mock_codes_locator
+
+        result = await extract_iata_codes(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
+        assert "connection_airports" not in result
+
+    @pytest.mark.asyncio
+    async def test_extract_handles_missing_codes(self):
+        """Test behavior when insufficient codes found."""
+        mock_element = MagicMock()
+        mock_codes_locator = MagicMock()
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX"])
+        mock_element.locator.return_value = mock_codes_locator
+
+        result = await extract_iata_codes(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] is None
+
+
 class TestExtractFlightDetails:
     """Tests for extract_flight_details function."""
 
@@ -155,6 +238,7 @@ class TestExtractFlightDetails:
         """Test extraction of complete flight information."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
+        mock_codes_locator = MagicMock()
 
         flight_desc = (
             "Depart flight with United. "
@@ -165,28 +249,73 @@ class TestExtractFlightDetails:
             "1 carry-on bag."
         )
 
-        mock_element.locator.return_value = mock_desc_locator
+        # Mock IATA codes
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "SFO"])
+
+        # Mock flight description
+        mock_element.locator.side_effect = lambda selector: (
+            mock_codes_locator if "xpath=" in selector else mock_desc_locator
+        )
         mock_desc_locator.get_attribute = AsyncMock(return_value=flight_desc)
 
         result = await extract_flight_details(mock_element)
 
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
         assert result["airline"] == "United"
-        assert result["departure_airport"] == "Los Angeles International Airport"
         assert result["num_stops"] == 0
         assert result["duration_minutes"] == 90
         assert result["carry_on_bags"] == 1
 
     @pytest.mark.asyncio
-    async def test_handles_missing_data(self):
-        """Test that missing aria-label returns empty flight info."""
+    async def test_extract_flight_with_layover(self):
+        """Test extraction of flight with connection."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
+        mock_codes_locator = MagicMock()
 
-        mock_element.locator.return_value = mock_desc_locator
+        flight_desc = (
+            "Depart flight with Delta. "
+            "1 stop flight. "
+            "Layover (1 of 1) is a 2 hr layover at Atlanta. "
+            "Total duration 5 hr."
+        )
+
+        # Mock IATA codes with connection
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "JFK", "ATL"])
+
+        mock_element.locator.side_effect = lambda selector: (
+            mock_codes_locator if "xpath=" in selector else mock_desc_locator
+        )
+        mock_desc_locator.get_attribute = AsyncMock(return_value=flight_desc)
+
+        result = await extract_flight_details(mock_element)
+
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "JFK"
+        assert result["connection_airports"] == ["ATL"]
+        assert result["num_stops"] == 1
+        assert result["layover_durations"] == ["2 hr"]
+
+    @pytest.mark.asyncio
+    async def test_handles_missing_data(self):
+        """Test that missing aria-label returns flight info with IATA codes only."""
+        mock_element = MagicMock()
+        mock_desc_locator = MagicMock()
+        mock_codes_locator = MagicMock()
+
+        # Mock IATA codes
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "SFO"])
+
+        mock_element.locator.side_effect = lambda selector: (
+            mock_codes_locator if "xpath=" in selector else mock_desc_locator
+        )
         mock_desc_locator.get_attribute = AsyncMock(return_value=None)
 
         result = await extract_flight_details(mock_element)
 
+        assert result["departure_airport"] == "LAX"
+        assert result["arrival_airport"] == "SFO"
         assert result["airline"] is None
         assert result["num_stops"] is None
 
@@ -195,9 +324,14 @@ class TestExtractFlightDetails:
         """Test that unicode characters are properly cleaned."""
         mock_element = MagicMock()
         mock_desc_locator = MagicMock()
+        mock_codes_locator = MagicMock()
 
         flight_desc = "Depart\u202fflight\xa0with United."
-        mock_element.locator.return_value = mock_desc_locator
+
+        mock_codes_locator.all_inner_texts = AsyncMock(return_value=["LAX", "SFO"])
+        mock_element.locator.side_effect = lambda selector: (
+            mock_codes_locator if "xpath=" in selector else mock_desc_locator
+        )
         mock_desc_locator.get_attribute = AsyncMock(return_value=flight_desc)
 
         result = await extract_flight_details(mock_element)
@@ -244,7 +378,6 @@ class TestExtractFinalPrice:
     async def test_extract_price_returns_none_on_timeout(self, mock_wait):
         """Test that None returned when price element not found."""
         mock_page = MagicMock()
-        mock_page.mouse.wheel = AsyncMock()
         mock_page.mouse.wheel = AsyncMock()
         mock_element = MagicMock()
         mock_element.wait_for = AsyncMock(side_effect=PlaywrightTimeoutError("timeout"))
@@ -294,6 +427,7 @@ class TestParsePriceDifference:
         assert parse_price_difference("$500 is high") == 0
         assert parse_price_difference("$300 is typical") == 0
         assert parse_price_difference("") is None
+
 
 class TestExtractPriceRelativity:
     """Tests for extract_price_relativity function."""

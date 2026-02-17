@@ -44,7 +44,7 @@ def test_departure_airport(scraper_fixture, request):
     assert "departure_airport" in return_results.keys()
     if result['status'] == "Ran successfully.":
         assert isinstance(return_results["departure_airport"], str)
-        assert return_results["departure_airport"] != ""
+        assert len(return_results["departure_airport"]) == 3
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_departure_date(scraper_fixture, request):
@@ -88,8 +88,9 @@ def test_departure_connection_airports(scraper_fixture, request):
             assert len(return_results["connection_airports"]) == 0
         else:
             assert len(return_results["connection_airports"]) > 0
-            assert isinstance(return_results["connection_airports"][0], str)
-            assert return_results["connection_airports"][0] != ""
+            for airport in return_results["connection_airports"]:
+                assert isinstance(airport, str)
+                assert len(airport) == 3
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_departure_layover_durations(scraper_fixture, request):
@@ -105,6 +106,17 @@ def test_departure_layover_durations(scraper_fixture, request):
             assert len(return_results["layover_durations"]) > 0
             assert isinstance(return_results["layover_durations"][0], str)
             assert return_results["layover_durations"][0] != ""
+
+@pytest.mark.parametrize("scraper_fixture", RESULTS)
+def test_departure_layover_durations_total_duration(scraper_fixture, request):
+    """Test that scraper returns departure layover duration different than total duration."""
+    result = request.getfixturevalue(scraper_fixture)
+    departure_results = result["return_flight"]
+    assert "layover_durations" in departure_results.keys()
+    if result['status'] == "Ran successfully.":
+        assert isinstance(departure_results["layover_durations"], list)
+        if departure_results["num_stops"] == 1:
+            assert departure_results["layover_durations"][0] != departure_results["duration_str"]
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_departure_layover_total_duration(scraper_fixture, request):
@@ -127,7 +139,7 @@ def test_arrival_airport(scraper_fixture, request):
     assert "arrival_airport" in return_results.keys()
     if result['status'] == "Ran successfully.":
         assert isinstance(return_results["arrival_airport"], str)
-        assert return_results["arrival_airport"] != ""
+        assert len(return_results["arrival_airport"]) == 3
 
 @pytest.mark.parametrize("scraper_fixture", RESULTS)
 def test_arrival_date(scraper_fixture, request):
