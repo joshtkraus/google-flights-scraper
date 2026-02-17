@@ -138,6 +138,30 @@ def extract_layover_info(flight_description: str):
 
 
 def extract_duration(flight_description: str):
+    """Extract total flight duration from flight description.
+
+    Args:
+        flight_description (str): Flight description text (aria-label)
+
+    Returns:
+        tuple: (duration_minutes, duration_str) or (None, None)
+    """
+    # Primary: match "Total duration X hr Y min" or "Total duration X hr"
+    if m := re.search(r"Total duration (\d+) hr(?: (\d+) min)?", flight_description):
+        hours = int(m.group(1))
+        minutes = int(m.group(2)) if m.group(2) else 0
+        duration_str = f"{hours} hr {minutes} min" if minutes else f"{hours} hr"
+        return hours * 60 + minutes, duration_str
+
+    # Fallback: match "Total duration X min" (short hops)
+    if m := re.search(r"Total duration (\d+) min", flight_description):
+        minutes = int(m.group(1))
+        return minutes, f"{minutes} min"
+
+    return None, None
+
+
+def extract_duration_layover(flight_description: str):
     """Extract flight duration from flight description.
 
     Args:
@@ -175,7 +199,7 @@ def total_layover_duration(layovers: list[str]):
         return 0
     layover_totals = []
     for layover in layovers:
-        layover_totals.append(extract_duration(layover)[0])
+        layover_totals.append(extract_duration_layover(layover)[0])
     return int(sum(layover_totals))
 
 
@@ -200,6 +224,38 @@ def extract_baggage_info(flight_description: str):
     return carry_on_bags, checked_bags
 
 
+async def extract_iata_codes(flight_element: Locator) -> dict[str, str | list[str] | None]:
+    """Extract IATA airport codes from flight element.
+
+    Args:
+        flight_element (Locator): Playwright Locator containing flight info
+
+    Returns:
+        Dict with 'departure_airport', 'arrival_airport', and optionally 'connection_airports'
+    """
+    codes_locator = flight_element.locator(
+        "xpath=//span[string-length(normalize-space(text())) = 3 and "
+        "translate(text(), 'abcdefghijklmnopqrstuvwxyz', '') = text()]"
+    )
+    code_list = await codes_locator.all_inner_texts()
+    code_list = [code.strip() for code in code_list if code.strip().isalpha()]
+
+    # Drop common airline names
+    code_list = [
+        code for code in code_list if code not in ["KLM", "ANA", "LOT", "TAP", "WOW", "SAS"]
+    ]
+
+    result: dict[str, str | list[str] | None] = {
+        "departure_airport": code_list[0] if len(code_list) > 0 else None,
+        "arrival_airport": code_list[1] if len(code_list) > 1 else None,
+    }
+
+    if len(code_list) > 2:
+        result["connection_airports"] = code_list[2:]
+
+    return result
+
+
 async def extract_flight_details(flight_element: Locator):
     """Extract all flight details from a flight element.
 
@@ -211,6 +267,11 @@ async def extract_flight_details(flight_element: Locator):
     """
     flight_info = create_empty_flight_info()
 
+    # Extract IATA codes
+    iata_codes = await extract_iata_codes(flight_element)
+    flight_info.update(iata_codes)
+
+    # Get flight description for other details
     flight_desc_locator = flight_element.locator("div[aria-label^='From ']")
 
     try:
@@ -228,20 +289,18 @@ async def extract_flight_details(flight_element: Locator):
     flight_info["airline"] = extract_airline(flight_description)
 
     (
-        flight_info["departure_airport"],
+        _,
         flight_info["departure_time"],
         flight_info["departure_date"],
     ) = extract_departure_info(flight_description)
 
-    flight_info["arrival_airport"], flight_info["arrival_time"], flight_info["arrival_date"] = (
-        extract_arrival_info(flight_description)
+    _, flight_info["arrival_time"], flight_info["arrival_date"] = extract_arrival_info(
+        flight_description
     )
 
     flight_info["num_stops"] = extract_num_stops(flight_description)
 
-    flight_info["connection_airports"], flight_info["layover_durations"] = extract_layover_info(
-        flight_description
-    )
+    _, flight_info["layover_durations"] = extract_layover_info(flight_description)
 
     flight_info["layover_total_minutes"] = total_layover_duration(flight_info["layover_durations"])
 
@@ -252,6 +311,7 @@ async def extract_flight_details(flight_element: Locator):
     flight_info["carry_on_bags"], flight_info["checked_bags"] = extract_baggage_info(
         flight_description
     )
+
     return flight_info
 
 
