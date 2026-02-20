@@ -4,6 +4,7 @@ import asyncio
 import json
 import random
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -108,6 +109,7 @@ class GoogleFlightsScraper:
             "price_relativity": None,
             "status": None,
             "url": None,
+            "time": None,
         }
 
     def _validate_inputs(
@@ -346,6 +348,8 @@ class GoogleFlightsScraper:
             end_date,
             seat_class,
         )
+
+        result["time"] = datetime.now()
 
         try:
             is_domestic_us = self._validate_inputs(
