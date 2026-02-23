@@ -23,6 +23,7 @@ from .parsers import (
     extract_final_price,
     extract_flight_details,
     extract_price_relativity,
+    extract_separate_ticket_ind,
 )
 from .validators import (
     is_domestic_us_flight,
@@ -107,6 +108,7 @@ class GoogleFlightsScraper:
             "price_classification": None,
             "price_difference": None,
             "price_relativity": None,
+            "separate_ticket": None,
             "status": None,
             "url": None,
             "time": None,
@@ -391,6 +393,8 @@ class GoogleFlightsScraper:
             result["price_relativity"] = self._calc_price_rel(
                 result["price"], result["price_difference"]
             )
+
+            result["separate_ticket"] = await extract_separate_ticket_ind(self.page)
 
             await asyncio.sleep(max(0.0, 1 + random.uniform(-0.5, 0.5)))
 
