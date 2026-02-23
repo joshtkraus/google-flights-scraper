@@ -19,6 +19,7 @@ from google_flights_scraper.parsers import (
     parse_price_classification,
     parse_price_difference,
     extract_price_relativity,
+    extract_separate_ticket_ind,
 )
 
 pytestmark = pytest.mark.unit
@@ -337,6 +338,52 @@ class TestExtractFlightDetails:
         result = await extract_flight_details(mock_element)
 
         assert result["airline"] == "United"
+
+
+class TestCheckForWord:
+    """Tests for check_for_word function."""
+
+    @pytest.mark.asyncio
+    async def test_word_found(self):
+        """Test that check_for_word returns True when word is present."""
+        mock_page = MagicMock()
+        mock_page.inner_text = AsyncMock(return_value="Please book separate tickets for this flight.")
+
+        result = await extract_separate_ticket_ind(mock_page)
+
+        mock_page.inner_text.assert_called_once_with('body')
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_word_not_found(self):
+        """Test that check_for_word returns False when word is absent."""
+        mock_page = MagicMock()
+        mock_page.inner_text = AsyncMock(return_value="Flight details and pricing information.")
+
+        result = await extract_separate_ticket_ind(mock_page)
+
+        mock_page.inner_text.assert_called_once_with('body')
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_case_insensitive(self):
+        """Test that check_for_word is case-insensitive."""
+        mock_page = MagicMock()
+        mock_page.inner_text = AsyncMock(return_value="Book SEPARATE tickets here.")
+
+        result = await extract_separate_ticket_ind(mock_page)
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_partial_match(self):
+        """Test that check_for_word finds word within larger text."""
+        mock_page = MagicMock()
+        mock_page.inner_text = AsyncMock(return_value="separately booked flights")
+
+        result = await extract_separate_ticket_ind(mock_page)
+
+        assert result is True
 
 
 class TestExtractFinalPrice:

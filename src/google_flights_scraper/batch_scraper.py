@@ -274,7 +274,9 @@ async def _scrape_task_with_timeout(
             "seat_class": task.get("seat_class"),
             "status": "Error: CAPTCHA detected",
             "price": None,
+            "separate_ticket": None,
             "time": task.get("time"),
+            "url": None,
         }
     except asyncio.TimeoutError:
         print(
@@ -293,7 +295,9 @@ async def _scrape_task_with_timeout(
             "seat_class": task.get("seat_class"),
             "status": f"Error: Task timed out after {task_timeout}s",
             "price": None,
+            "separate_ticket": None,
             "time": task.get("time"),
+            "url": None,
         }
 
 
@@ -316,7 +320,9 @@ def _captcha_cancelled_result(task: dict) -> dict:
         "seat_class": task.get("seat_class"),
         "status": "Cancelled: CAPTCHA detected in earlier task",
         "price": None,
+        "separate_ticket": None,
         "time": task.get("time"),
+        "url": None,
     }
 
 
@@ -358,7 +364,9 @@ async def _scrape_task(task: dict):
             "seat_class": task.get("seat_class"),
             "status": f"Error: {str(e)}",
             "price": None,
+            "separate_ticket": None,
             "time": task.get("time"),
+            "url": None,
         }
 
     return flat_result
@@ -391,6 +399,7 @@ def _flatten_result(result: dict) -> dict:
     flat["price_classification"] = result.get("price_classification")
     flat["price_difference"] = result.get("price_difference")
     flat["price_relativity"] = result.get("price_relativity")
+    flat["separate_ticket"] = result.get("separate_ticket")
     flat["status"] = result.get("status")
     flat["url"] = result.get("url")
     flat["time"] = result.get("time")
