@@ -31,3 +31,10 @@ def test_results_url(scraper_fixture, request):
     if result['status'] == "Ran successfully.":
         assert isinstance(result["url"], str)
         assert result["url"] != ""
+
+@pytest.mark.parametrize("scraper_fixture", RESULTS)
+def test_separate_ticket(scraper_fixture, request):
+    """Test that scraper returns separate ticket ind."""
+    result = request.getfixturevalue(scraper_fixture)
+    if result['status'] == "Ran successfully.":
+        assert isinstance(result["separate_ticket"], bool)

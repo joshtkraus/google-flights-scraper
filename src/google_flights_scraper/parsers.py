@@ -446,3 +446,19 @@ async def extract_price_relativity(page: Page, timeout: int):
     amount = parse_price_difference(text)
 
     return classification, amount
+
+
+async def extract_separate_ticket_ind(page: Page):
+    """Identify presence of separate ticket message.
+
+    Args:
+        page (Page): Playwright Page instance
+
+    Returns:
+        bool: True or False
+    """
+    # Get all text content from the page
+    page_text = await page.inner_text("body")
+
+    # Case-insensitive search
+    return "separate" in page_text.lower()
