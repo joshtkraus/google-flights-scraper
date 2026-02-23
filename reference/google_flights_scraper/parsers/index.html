@@ -889,6 +889,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#google_flights_scraper.parsers.extract_separate_ticket_ind" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        extract_separate_ticket_ind
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#google_flights_scraper.parsers.parse_price_classification" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2809,6 +2820,112 @@
 <a id="__codelineno-0-446" name="__codelineno-0-446"></a>    <span class="n">amount</span> <span class="o">=</span> <span class="n">parse_price_difference</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 <a id="__codelineno-0-447" name="__codelineno-0-447"></a>
 <a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="k">return</span> <span class="n">classification</span><span class="p">,</span> <span class="n">amount</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="google_flights_scraper.parsers.extract_separate_ticket_ind" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">extract_separate_ticket_ind</span><span class="p">(</span><span class="n">page</span><span class="p">)</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-async"><code>async</code></small>
+  </span>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Identify presence of separate ticket message.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>page</code>
+            </td>
+            <td>
+                  <code><span title="playwright.async_api.Page">Page</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Playwright Page instance</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>bool</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>True or False</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="mkdocstrings-source">
+              <summary>Source code in <code>src/google_flights_scraper/parsers.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-451">451</a></span>
+<span class="normal"><a href="#__codelineno-0-452">452</a></span>
+<span class="normal"><a href="#__codelineno-0-453">453</a></span>
+<span class="normal"><a href="#__codelineno-0-454">454</a></span>
+<span class="normal"><a href="#__codelineno-0-455">455</a></span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span>
+<span class="normal"><a href="#__codelineno-0-458">458</a></span>
+<span class="normal"><a href="#__codelineno-0-459">459</a></span>
+<span class="normal"><a href="#__codelineno-0-460">460</a></span>
+<span class="normal"><a href="#__codelineno-0-461">461</a></span>
+<span class="normal"><a href="#__codelineno-0-462">462</a></span>
+<span class="normal"><a href="#__codelineno-0-463">463</a></span>
+<span class="normal"><a href="#__codelineno-0-464">464</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-451" name="__codelineno-0-451"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">extract_separate_ticket_ind</span><span class="p">(</span><span class="n">page</span><span class="p">:</span> <span class="n">Page</span><span class="p">):</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Identify presence of separate ticket message.</span>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a><span class="sd">        page (Page): Playwright Page instance</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-458" name="__codelineno-0-458"></a><span class="sd">        bool: True or False</span>
+<a id="__codelineno-0-459" name="__codelineno-0-459"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-460" name="__codelineno-0-460"></a>    <span class="c1"># Get all text content from the page</span>
+<a id="__codelineno-0-461" name="__codelineno-0-461"></a>    <span class="n">page_text</span> <span class="o">=</span> <span class="k">await</span> <span class="n">page</span><span class="o">.</span><span class="n">inner_text</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-462" name="__codelineno-0-462"></a>
+<a id="__codelineno-0-463" name="__codelineno-0-463"></a>    <span class="c1"># Case-insensitive search</span>
+<a id="__codelineno-0-464" name="__codelineno-0-464"></a>    <span class="k">return</span> <span class="s2">&quot;separate&quot;</span> <span class="ow">in</span> <span class="n">page_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
